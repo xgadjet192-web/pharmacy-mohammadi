@@ -1,0 +1,595 @@
+{% extends "pharmacy/base.html" %} {% block title %}بانک دارو{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>بانک جامع دارویی</h4>
+        <span class="sub">جستجو و مدیریت داروها — {{ total }} دارو</span>
+    </div>
+    <div class="topbar-actions">
+        <a href="{% url 'drug_bank' %}?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.form %}form={{ request.GET.form }}&{% endif %}export=excel" class="btn btn-success">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>            خروجی Excel
+        </a>
+        <a href="{% url 'product_list' %}" class="btn btn-secondary">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> محصولات
+        </a>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     KPI CARDS — کارت‌های آمار سریع
+     ══════════════════════════════════════════════════════════════ -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+    <div class="glass-card" style="padding:16px;text-align:center">
+        <div style="font-size:28px;margin-bottom:6px">💊</div>
+        <div class="kpi-value" style="font-size:22px">{{ total }}</div>
+        <div class="kpi-label">کل داروها</div>
+    </div>
+    <div class="glass-card" style="padding:16px;text-align:center">
+        <div style="font-size:28px;margin-bottom:6px">🟢</div>
+        <div class="kpi-value" style="font-size:22px;color:#25c26e">{{ otc_count|default:0 }}</div>
+        <div class="kpi-label">OTC (بدون نسخه)</div>
+    </div>
+    <div class="glass-card" style="padding:16px;text-align:center">
+        <div style="font-size:28px;margin-bottom:6px">🔴</div>
+        <div class="kpi-value" style="font-size:22px;color:#ff5d6c">{{ rx_count|default:0 }}</div>
+        <div class="kpi-label">Rx (با نسخه)</div>
+    </div>
+    <div class="glass-card" style="padding:16px;text-align:center">
+        <div style="font-size:28px;margin-bottom:6px">📂</div>
+        <div class="kpi-value" style="font-size:22px;color:#5b8cff">{{ categories|length }}</div>
+        <div class="kpi-label">دسته‌بندی</div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     FILTER FORM — فرم فیلتر
+     ══════════════════════════════════════════════════════════════ -->
+<div class="glass-card" style="padding:20px;margin-bottom:20px">
+    <form method="GET">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:12px;align-items:end">
+            <div>
+                <label class="form-label">جستجو</label>
+                <div style="position:relative">
+                    <input type="text" name="q" class="form-control" value="{{ search_query }}" placeholder="نام دارو، ماده مؤثره، نام انگلیسی، موارد مصرف..." style="padding-right:40px">
+                    <svg width="16" height="16" fill="none" stroke="#9fb0d0" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;right:12px;top:50%;transform:translateY(-50%)">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Category dropdown — دراپ‌داون دسته‌بندی -->
+            <div>
+                <label class="form-label">دسته‌بندی</label>
+                <select name="category" class="form-select">
+                    <option value="">همه دسته‌ها</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.pk }}"
+                        {% if selected_category == cat.pk|stringformat:'s' %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Drug form dropdown — دراپ‌داون فرم دارو
+                 Uses Drug.FORM_CHOICES from model (English keys)
+                 از Drug.FORM_CHOICES مدل استفاده می‌کند (کلیدهای انگلیسی) -->
+            <div>
+                <label class="form-label">فرم دارو</label>
+                <select name="form" class="form-select">
+                    <option value="">همه فرم‌ها</option>
+                    {% for key, label in form_choices %}
+                    <option value="{{ key }}" {% if selected_form == key %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- OTC/Rx dropdown — دراپ‌داون نوع تجویز
+                 Uses Drug.OTCPX_CHOICES from model (lowercase keys: otc/rx)
+                 از Drug.OTCPX_CHOICES مدل استفاده می‌کند (کلیدهای کوچک: otc/rx) -->
+            <div>
+                <label class="form-label">نوع تجویز</label>
+                <select name="otc" class="form-select">
+                    <option value="">همه</option>
+                    {% for key, label in otc_choices %}
+                    <option value="{{ key }}" {% if selected_otc == key %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="display:flex;gap:8px">
+                <button type="submit" class="btn btn-primary">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    جستجو
+                </button>
+                <a href="{% url 'drug_bank' %}" class="btn btn-secondary" style="padding:9px 12px">✕</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     DRUG TABLE — جدول داروها
+     ══════════════════════════════════════════════════════════════ -->
+<div class="glass-card">
+    {% if drugs %}
+
+    <!-- Results info bar — نوار اطلاعات نتایج -->
+    <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;color:#9fb0d0">
+            {% if search_query or selected_category or selected_form or selected_otc %}
+                نتایج فیلتر شده:
+            {% else %}
+                نمایش:
+            {% endif %}
+            <strong style="color:#fff">{{ drugs|length }}</strong> دارو
+            {% if total > drugs|length %}
+                از <strong style="color:#ffb020">{{ total }}</strong> دارو
+            {% endif %}
+        </span>
+        <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-size:11px;color:#64748b">
+                <span style="color:#6ee7b7">●</span> OTC
+            <span style="color:#fca5a5;margin-right:8px">●</span> Rx
+            </span>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40px">#</th>
+                    <th>نام دارو</th>
+                    <th style="direction:ltr;text-align:left">Generic / English</th>
+                    <th>فرم</th>
+                    <th>دوز</th>
+                    <th>دسته</th>
+                    <th>تجویز</th>
+                    <th>موارد مصرف</th>
+                    <th style="width:140px">اقدام</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for drug in drugs %}
+                <tr>
+                    <!-- Row number — شماره ردیف -->
+                    <td style="color:rgba(255,255,255,.25);font-size:11px">{{ forloop.counter }}</td>
+
+                    <!-- Drug name with form icon — نام دارو با آیکون فرم
+                         FIXED: now uses correct model FORM_CHOICES English keys
+                         اصلاح شد: حالا از کلیدهای انگلیسی صحیح FORM_CHOICES مدل استفاده می‌کند
+                         Old (broken): 'tab', 'cap', 'inj', 'amp', 'oint', 'inhale', 'supp'
+                         New (correct): 'tablet', 'capsule', 'injection', 'ointment', 'inhaler', 'suppository' -->
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <!-- Drug form icon background — پس‌زمینه آیکون فرم دارو -->
+                            <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+                                {% if drug.drug_form == 'tablet' or drug.drug_form == 'capsule' %}
+                                    background:rgba(91,140,255,.15);
+                                {% elif drug.drug_form == 'syrup' or drug.drug_form == 'solution' or drug.drug_form == 'serum' %}
+                                    background:rgba(56,189,248,.15);
+                                {% elif drug.drug_form == 'injection' %}
+                                    background:rgba(255,93,108,.15);
+                                {% elif drug.drug_form == 'cream' or drug.drug_form == 'ointment' or drug.drug_form == 'gel' or drug.drug_form == 'lotion' %}
+                                    background:rgba(16,185,129,.15);
+                                {% elif drug.drug_form == 'drop' %}
+                                    background:rgba(6,182,212,.15);
+                                {% elif drug.drug_form == 'spray' or drug.drug_form == 'inhaler' %}
+                                    background:rgba(124,92,255,.15);
+                                {% elif drug.drug_form == 'suppository' %}
+                                    background:rgba(245,158,11,.15);
+                                {% elif drug.drug_form == 'patch' %}
+                                    background:rgba(236,72,153,.15);
+                                {% else %}
+                                    background:rgba(255,255,255,.08);
+                                {% endif %}">
+                                <!-- Drug form emoji icon — آیکون ایموجی فرم دارو
+                                     FIXED: matches model FORM_CHOICES keys exactly
+                                     اصلاح شد: دقیقاً با کلیدهای FORM_CHOICES مدل مطابقت دارد -->
+                                {% if drug.drug_form == 'tablet' %}💊 {% elif drug.drug_form == 'capsule' %}💊 {% elif drug.drug_form == 'syrup' %}🍶 {% elif drug.drug_form == 'drop' %}💧 {% elif drug.drug_form == 'injection' %}💉 {% elif drug.drug_form == 'serum' %}💉 {% elif drug.drug_form
+                                == 'ointment' %}🧴 {% elif drug.drug_form == 'cream' %}🧴 {% elif drug.drug_form == 'lotion' %}🧴 {% elif drug.drug_form == 'gel' %}🧪 {% elif drug.drug_form == 'spray' %}💨 {% elif drug.drug_form == 'inhaler' %}😮‍💨 {%
+                                elif drug.drug_form == 'suppository' %}🔹 {% elif drug.drug_form == 'patch' %}🩹 {% elif drug.drug_form == 'powder' %}🫧 {% elif drug.drug_form == 'solution' %}💧 {% elif drug.drug_form == 'shampoo' %}🧴 {% elif drug.drug_form
+                                == 'soap' %}🧼 {% elif drug.drug_form == 'device' %}🩺 {% elif drug.drug_form == 'bandage' %}🩹 {% else %}💊 {% endif %}
+                            </div>
+
+                            <div>
+                                <!-- Persian drug name — نام فارسی دارو -->
+                                <div style="font-weight:700;color:#fff;font-size:13px">
+                                    {{ drug.name_fa }}
+                                </div>
+                                {% if drug.brand_name %}
+                                <!-- Brand name badge — نشان نام تجاری -->
+                                <div style="font-size:10px;color:rgba(124,92,255,.85);margin-top:2px">
+                                    <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg> {{ drug.brand_name }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- English/generic name — نام انگلیسی/ژنریک -->
+                    <td style="direction:ltr;text-align:left">
+                        <span style="color:rgba(255,255,255,.6);font-size:12px">
+                            {{ drug.name_en|default:"—" }}
+                        </span>
+                    </td>
+
+                    <!-- Drug form badge — نشان فرم دارو
+                         FIXED: color coding uses correct English model keys
+                         اصلاح شد: کدگذاری رنگ از کلیدهای انگلیسی صحیح مدل استفاده می‌کند -->
+                    <td>
+                        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;
+                            {% if drug.drug_form == 'tablet' or drug.drug_form == 'capsule' %}
+                                background:rgba(91,140,255,.15);color:#93c5fd;
+                            {% elif drug.drug_form == 'syrup' or drug.drug_form == 'solution' or drug.drug_form == 'serum' %}
+                                background:rgba(56,189,248,.15);color:#7dd3fc;
+                            {% elif drug.drug_form == 'injection' %}
+                                background:rgba(255,93,108,.15);color:#fca5a5;
+                            {% elif drug.drug_form == 'cream' or drug.drug_form == 'ointment' or drug.drug_form == 'gel' or drug.drug_form == 'lotion' %}
+                                background:rgba(16,185,129,.15);color:#6ee7b7;
+                            {% elif drug.drug_form == 'drop' %}
+                                background:rgba(6,182,212,.15);color:#67e8f9;
+                            {% elif drug.drug_form == 'spray' or drug.drug_form == 'inhaler' %}
+                                background:rgba(124,92,255,.15);color:#c4b5fd;
+                            {% elif drug.drug_form == 'patch' %}
+                                background:rgba(236,72,153,.15);color:#f9a8d4;
+                            {% elif drug.drug_form == 'suppository' %}
+                                background:rgba(245,158,11,.15);color:#fcd34d;
+                            {% else %}
+                                background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);
+                            {% endif %}">
+                            {{ drug.get_drug_form_display }}
+                        </span>
+                    </td>
+
+                    <!-- Strength / dose — دوز / قدرت -->
+                    <td>
+                        <span style="color:rgba(245,158,11,.9);font-size:12px;font-weight:600">
+                            {{ drug.strength|default:"—" }}
+                        </span>
+                    </td>
+
+                    <!-- Category — دسته‌بندی -->
+                    <td>
+                        <span style="color:rgba(255,255,255,.5);font-size:11px">
+                            {{ drug.category.name|default:"—" }}
+                        </span>
+                    </td>
+
+                    <!-- OTC / Rx badge — نشان OTC/Rx
+                         FIXED: checks lowercase 'otc'/'rx' matching model choices
+                         اصلاح شد: 'otc'/'rx' حروف کوچک را چک می‌کند که با choices مدل مطابقت دارد
+                         Previously data was stored as 'OTC'/'RX' (uppercase) — now fixed in DB
+                         قبلاً داده با 'OTC'/'RX' ذخیره شده بود — الان در دیتابیس اصلاح شد -->
+                    <td>
+                        {% if drug.otc_rx == 'otc' %}
+                        <span style="background:rgba(16,185,129,.15);color:#6ee7b7;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px">
+                            <span style="width:5px;height:5px;border-radius:50%;background:#25c26e;box-shadow:0 0 4px #25c26e"></span> OTC
+                        </span>
+                        {% elif drug.otc_rx == 'rx' %}
+                        <span style="background:rgba(255,93,108,.15);color:#fca5a5;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px">
+                            <span style="width:5px;height:5px;border-radius:50%;background:#ff5d6c;box-shadow:0 0 4px #ff5d6c"></span> Rx
+                        </span>
+                        {% else %}
+                        <span style="color:rgba(255,255,255,.25);font-size:11px">—</span> {% endif %}
+                    </td>
+
+                    <!-- Indications (truncated) — موارد مصرف (کوتاه‌شده) -->
+                    <td>
+                        <span style="font-size:11px;color:rgba(255,255,255,.4);display:block;max-width:180px" title="{{ drug.indications|default:'' }}">
+                            {{ drug.indications|truncatechars:55|default:"—" }}
+                        </span>
+                    </td>
+
+                    <!-- Action buttons — دکمه‌های اقدام -->
+                    <td>
+                        <div style="display:flex;gap:5px">
+                            <!-- Add to products button — دکمه افزودن به محصولات -->
+                            <button class="mini-btn" style="background:rgba(37,194,110,.15);color:#6ee7b7;white-space:nowrap" onclick="addToProducts({{ drug.pk }}, '{{ drug.name_fa|escapejs }}')">
+                                <svg width="10" height="10" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" viewBox="0 0 24 24"
+                                    style="display:inline-block;vertical-align:middle">
+                                    <circle cx="12" cy="12" r="9"/>
+                                    <line x1="12" y1="8" x2="12" y2="16"/>
+                                    <line x1="8" y1="12" x2="16" y2="12"/>
+                                </svg>
+                                افزودن
+                            </button>
+
+                            <!-- Detail button — دکمه جزئیات -->
+                            <button class="mini-btn" style="background:rgba(56,189,248,.1);color:#38bdf8" onclick="showDetail(
+                                    {{ drug.pk }},
+                                    '{{ drug.name_fa|escapejs }}',
+                                    '{{ drug.name_en|default:''|escapejs }}',
+                                    '{{ drug.get_drug_form_display|escapejs }}',
+                                    '{{ drug.strength|default:''|escapejs }}',
+                                    '{{ drug.category.name|default:''|escapejs }}',
+                                    '{{ drug.otc_rx }}',
+                                    '{{ drug.indications|default:''|truncatechars:200|escapejs }}',
+                                    '{{ drug.contraindications|default:''|truncatechars:200|escapejs }}',
+                                    '{{ drug.side_effects|default:''|truncatechars:200|escapejs }}'
+                                )">
+                                <svg width="10" height="10" fill="none" stroke="currentColor"
+                                    stroke-width="2" viewBox="0 0 24 24"
+                                    style="display:inline-block;vertical-align:middle">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="8" x2="12" y2="12"/>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                </svg>
+                                جزئیات
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if total > drugs|length %}
+    <div style="padding:12px 20px;text-align:center;font-size:12px;color:rgba(255,255,255,.3);border-top:1px solid rgba(255,255,255,.05)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-left:4px">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg> نمایش {{ drugs|length }} مورد از {{ total }} دارو — برای نتایج دقیق‌تر از جستجو استفاده کنید
+    </div>
+    {% endif %} {% else %}
+    <!-- Empty state — حالت خالی -->
+    <div style="padding:70px;text-align:center;color:rgba(255,255,255,.3)">
+        <div style="font-size:56px;margin-bottom:16px">💊</div>
+        <div style="font-size:18px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:8px">دارویی یافت نشد</div>
+        <div style="font-size:13px;margin-bottom:20px">عبارت جستجو یا فیلترها را تغییر دهید</div>
+        <a href="{% url 'drug_bank' %}" class="btn btn-secondary">نمایش همه داروها</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     DRUG DETAIL MODAL — مودال جزئیات دارو
+     ══════════════════════════════════════════════════════════════ -->
+<div id="drugModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;align-items:center;justify-content:center;padding:20px">
+    <div class="glass-card" style="width:min(600px,100%);max-height:85vh;overflow-y:auto;padding:28px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 style="color:#fff;margin:0;font-size:18px" id="modal-title">جزئیات دارو</h3>
+            <button onclick="closeModal()" style="background:rgba(255,255,255,.08);border:none;color:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:16px">✕</button>
+        </div>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     AI PHARMACY ASSISTANT — دستیار هوشمند دارویی
+     Floating chat button + panel powered by Groq API
+     دکمه شناور چت + پنل با استفاده از Groq API
+     ══════════════════════════════════════════════════════════════ -->
+
+<!-- Floating AI button — دکمه شناور هوش مصنوعی -->
+<button id="aiBtn" onclick="toggleAIChat()" title="دستیار دارویی هوشمند" style="
+    position:fixed;left:24px;bottom:24px;z-index:1000;
+    width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+    background:linear-gradient(135deg,#7c5cff,#5b8cff);
+    box-shadow:0 4px 24px rgba(124,92,255,.5);
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;transition:transform .2s">
+    🤖
+</button>
+
+<!-- AI Chat panel — پنل چت هوش مصنوعی -->
+<div id="aiPanel" style="
+    display:none;position:fixed;left:24px;bottom:90px;z-index:1000;
+    width:340px;height:480px;
+    background:#0f1623;border:1px solid rgba(124,92,255,.3);
+    border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.6);
+    flex-direction:column;overflow:hidden">
+
+    <!-- Header — سربرگ پنل -->
+    <div style="padding:16px 20px;background:linear-gradient(135deg,rgba(124,92,255,.2),rgba(91,140,255,.2));border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">🤖</span>
+            <div>
+                <div style="font-weight:700;color:#fff;font-size:13px">دستیار دارویی هوشمند</div>
+                <div style="font-size:10px;color:#6ee7b7">● آنلاین</div>
+            </div>
+        </div>
+        <button onclick="toggleAIChat()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:18px">✕</button>
+    </div>
+
+    <!-- Messages area — ناحیه پیام‌ها -->
+    <div id="aiMessages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">
+        <!-- Welcome message — پیام خوش‌آمد -->
+        <div style="background:rgba(124,92,255,.1);border:1px solid rgba(124,92,255,.2);border-radius:12px;padding:12px;font-size:12px;color:rgba(255,255,255,.7);line-height:1.7">
+            سلام! 👋 من دستیار دارویی هوشمند هوش مصنوعی هستم.<br> می‌تونی درباره داروها بپرسی:<br> 💊 موارد مصرف<br> ⚠️ عوارض جانبی<br> 🔄 تداخل دارویی<br> 💉 دوز مصرف
+        </div>
+    </div>
+
+    <!-- Input area — ناحیه ورودی -->
+    <div style="padding:12px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:8px">
+        <input id="aiInput" type="text" placeholder="سوال دارویی بپرس..." style="
+            flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+            border-radius:10px;padding:10px 12px;color:#fff;font-size:12px;outline:none;
+            font-family:Vazir,sans-serif;direction:rtl" onkeydown="if(event.key==='Enter')sendAIMessage()">
+        <button onclick="sendAIMessage()" id="aiSendBtn" style="
+            background:linear-gradient(135deg,#7c5cff,#5b8cff);border:none;
+            border-radius:10px;padding:10px 14px;cursor:pointer;color:#fff;font-size:16px">
+            ➤
+        </button>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // ── Add drug to products — افزودن دارو به محصولات ──────────────
+    function addToProducts(pk, name) {
+        if (!confirm(`افزودن «${name}» به محصولات داروخانه؟`)) return;
+        fetch(`/pharmacy/drug-bank/${pk}/to-product/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(r => r.json())
+            .then(d => toast(d.message, d.success ? 'success' : 'warning'))
+            .catch(() => toast('خطا در ارتباط با سرور', 'danger'));
+    }
+
+    // ── Show drug detail modal — نمایش مودال جزئیات دارو ──────────
+    // FIXED: otcRx now correctly compares lowercase 'otc'/'rx'
+    // اصلاح شد: otcRx حالا به درستی 'otc'/'rx' حروف کوچک مقایسه می‌کند
+    function showDetail(pk, nameFa, nameEn, form, strength, category, otcRx, indications, contraindications, sideEffects) {
+
+        // Build OTC/Rx badge — ساخت نشان OTC/Rx
+        // Normalize to lowercase for comparison — نرمال‌سازی به حروف کوچک برای مقایسه
+        const otcNorm = otcRx ? otcRx.toLowerCase().trim() : '';
+        const otcBadge = otcNorm === 'otc' ?
+            '<span style="background:rgba(16,185,129,.15);color:#6ee7b7;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">OTC — بدون نسخه</span>' :
+            otcNorm === 'rx' ?
+            '<span style="background:rgba(255,93,108,.15);color:#fca5a5;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">Rx — نیاز به نسخه</span>' :
+            '<span style="color:rgba(255,255,255,.4);font-size:12px">—</span>';
+
+        document.getElementById('modal-title').textContent = nameFa;
+        document.getElementById('modal-body').innerHTML = `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+                ${mrow('نام فارسی', nameFa)}
+                ${mrow('نام انگلیسی', `<span style="direction:ltr;display:inline-block">${nameEn || '—'}</span>`)}
+                ${mrow('فرم دارو', form || '—')}
+                ${mrow('دوز / قدرت', strength || '—')}
+                ${mrow('دسته دارویی', category || '—')}
+                ${mrow('نوع تجویز', otcBadge)}
+            </div>
+            ${indications      ? msec('موارد مصرف',       indications,      '#25c26e') : ''}
+            ${contraindications? msec('موارد منع مصرف',   contraindications,'#ff5d6c') : ''}
+            ${sideEffects      ? msec('عوارض جانبی',      sideEffects,      '#ffb020') : ''}
+            <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px">
+                <button onclick="addToProducts(${pk}, '${nameFa.replace(/'/g,"\\'")}');closeModal()"
+                    class="btn btn-success" style="font-size:13px">
+                    افزودن به محصولات
+                </button>
+                <button onclick="closeModal()" class="btn btn-secondary" style="font-size:13px">بستن</button>
+            </div>`;
+
+        document.getElementById('drugModal').style.display = 'flex';
+    }
+
+    // ── Modal helper: info row — تابع کمکی مودال: ردیف اطلاعات ──
+    function mrow(label, value) {
+        return `<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.06)">
+            <div style="font-size:10px;color:#9fb0d0;margin-bottom:4px">${label}</div>
+            <div style="font-size:13px;color:#fff;font-weight:600">${value}</div>
+        </div>`;
+    }
+
+    // ── Modal helper: section block — تابع کمکی مودال: بلوک بخش ──
+    function msec(title, content, color) {
+        return `<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:14px;margin-bottom:10px">
+            <div style="font-size:12px;font-weight:700;color:${color};margin-bottom:8px">${title}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.65);line-height:1.8">${content}</div>
+        </div>`;
+    }
+
+    // ── Close modal — بستن مودال ────────────────────────────────
+    function closeModal() {
+        document.getElementById('drugModal').style.display = 'none';
+    }
+
+    // Close modal on backdrop click — بستن مودال با کلیک روی پس‌زمینه
+    document.getElementById('drugModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ══════════════════════════════════════════════════════════════
+    // AI PHARMACY ASSISTANT LOGIC — منطق دستیار هوشمند دارویی
+    // Communicates with Django ai_chat view via Groq API
+    // ارتباط با ویوی ai_chat جنگو از طریق Groq API
+    // ══════════════════════════════════════════════════════════════
+
+    // ── Toggle AI chat panel open/close — باز و بسته کردن پنل چت ──
+    function toggleAIChat() {
+        const panel = document.getElementById('aiPanel');
+        const isOpen = panel.style.display === 'flex';
+        panel.style.display = isOpen ? 'none' : 'flex';
+        if (!isOpen) document.getElementById('aiInput').focus();
+    }
+
+    // ── Send message to AI — ارسال پیام به هوش مصنوعی ─────────────
+    function sendAIMessage() {
+        const input = document.getElementById('aiInput');
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        // Show user message — نمایش پیام کاربر
+        appendAIMessage(msg, 'user');
+        input.value = '';
+        document.getElementById('aiSendBtn').disabled = true;
+
+        // Show loading indicator — نمایش نشانگر بارگذاری
+        const loadId = appendAIMessage('در حال پاسخ‌دهی ●●●', 'loading');
+
+        // Send request to Django view — ارسال درخواست به ویوی جنگو
+        fetch("{% url 'ai_chat' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ message: msg })
+        })
+        .then(r => r.json())
+        .then(data => {
+            // Remove loading indicator — حذف نشانگر بارگذاری
+            document.getElementById(loadId)?.remove();
+            document.getElementById('aiSendBtn').disabled = false;
+            if (data.reply) {
+                appendAIMessage(data.reply, 'ai');
+            } else {
+                appendAIMessage('خطایی رخ داد. دوباره تلاش کن.', 'error');
+            }
+        })
+        .catch(() => {
+            document.getElementById(loadId)?.remove();
+            document.getElementById('aiSendBtn').disabled = false;
+            appendAIMessage('خطا در ارتباط با سرور.', 'error');
+        });
+    }
+
+    // ── Append message bubble to chat — اضافه کردن حباب پیام به چت ──
+    function appendAIMessage(text, type) {
+        const container = document.getElementById('aiMessages');
+        const id = 'msg_' + Date.now();
+        const div = document.createElement('div');
+        div.id = id;
+
+        if (type === 'user') {
+            // User bubble — حباب کاربر (راست‌چین)
+            div.style.cssText = 'background:rgba(91,140,255,.15);border:1px solid rgba(91,140,255,.2);border-radius:12px 12px 4px 12px;padding:10px 12px;font-size:12px;color:#fff;text-align:right;line-height:1.7;align-self:flex-end;max-width:85%';
+        } else if (type === 'ai') {
+            // AI bubble — حباب هوش مصنوعی (چپ‌چین)
+            div.style.cssText = 'background:rgba(37,194,110,.08);border:1px solid rgba(37,194,110,.15);border-radius:12px 12px 12px 4px;padding:10px 12px;font-size:12px;color:rgba(255,255,255,.85);line-height:1.8;max-width:90%';
+        } else if (type === 'loading') {
+            // Loading indicator — نشانگر بارگذاری
+            div.style.cssText = 'color:rgba(255,255,255,.3);font-size:12px;padding:4px 8px';
+        } else {
+            // Error bubble — حباب خطا
+            div.style.cssText = 'background:rgba(255,93,108,.1);border:1px solid rgba(255,93,108,.2);border-radius:10px;padding:8px 12px;font-size:11px;color:#fca5a5';
+        }
+
+        div.textContent = text;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+        return id;
+    }
+</script>
+{% endblock %} {% endblock %}

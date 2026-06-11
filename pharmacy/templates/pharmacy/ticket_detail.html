@@ -1,0 +1,50 @@
+{% extends "pharmacy/base.html" %} {% block title %}جزئیات تیکت{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>{{ ticket.title }}</h4>
+        <span class="sub">جزئیات تیکت #{{ ticket.pk }}</span>
+    </div>
+    <div class="topbar-actions">
+        <a href="{% url 'ticket_list' %}" class="btn btn-secondary">↩ بازگشت</a> {% if ticket.status != 'closed' %}
+        <button class="btn btn-danger" onclick="closeTicket({{ ticket.pk }})">بستن تیکت</button> {% endif %}
+    </div>
+</div>
+
+<div style="max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+    <div class="glass-card" style="padding:24px">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+            {% if ticket.status == 'open' %}
+            <span style="background:rgba(255,176,32,.15);color:#ffb020;padding:5px 14px;border-radius:999px;font-size:13px;font-weight:700">در انتظار پاسخ</span> {% elif ticket.status == 'answered' %}
+            <span style="background:rgba(37,194,110,.15);color:#25c26e;padding:5px 14px;border-radius:999px;font-size:13px;font-weight:700">پاسخ داده شده</span> {% else %}
+            <span style="background:rgba(255,255,255,.08);color:#9fb0d0;padding:5px 14px;border-radius:999px;font-size:13px;font-weight:700">بسته شده</span> {% endif %}
+        </div>
+        <div style="font-size:12px;color:#9fb0d0;margin-bottom:12px">ثبت شده در: {{ created_fa }}</div>
+        <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:16px;color:#e8eefc;line-height:1.8">{{ ticket.message }}</div>
+    </div>
+
+    {% if ticket.admin_reply %}
+    <div class="glass-card" style="padding:24px;border:1px solid rgba(37,194,110,.2)">
+        <div style="font-size:14px;font-weight:700;color:#25c26e;margin-bottom:12px">✅ پاسخ پشتیبانی</div>
+        {% if replied_fa %}
+        <div style="font-size:12px;color:#9fb0d0;margin-bottom:12px">{{ replied_fa }}</div>{% endif %}
+        <div style="background:rgba(37,194,110,.05);border-radius:12px;padding:16px;color:#e8eefc;line-height:1.8">{{ ticket.admin_reply }}</div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+    function closeTicket(pk) {
+        if (!confirm('آیا از بستن این تیکت اطمینان دارید؟')) return;
+        fetch(`/pharmacy/tickets/${pk}/close/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        }).then(r => r.json()).then(d => {
+            if (d.success) window.location.href = "{% url 'ticket_list' %}";
+        });
+    }
+</script>
+{% endblock %} {% endblock %}

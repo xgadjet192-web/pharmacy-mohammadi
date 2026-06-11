@@ -1,0 +1,981 @@
+{% extends "pharmacy/base.html" %} {% block title %}ماشین حساب پیشرفته{% endblock %} {% block content %}
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>ماشین حساب پیشرفته</h4>
+        <span class="sub">محاسبات مهندسی، دارویی و دوز دارو</span>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start">
+
+    <!-- ستون چپ — ماشین حساب اصلی -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- نمایشگر -->
+        <div class="glass-card" style="padding:20px">
+            <div style="background:rgba(0,0,0,.4);border-radius:14px;padding:16px 18px;margin-bottom:4px">
+                <div id="expr-display" style="font-size:12px;color:#9fb0d0;min-height:18px;text-align:left;direction:ltr;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">&nbsp;</div>
+                <div id="main-display" style="font-size:34px;font-weight:700;color:#fff;text-align:left;direction:ltr;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-top:4px">0</div>
+            </div>
+            <!-- حافظه -->
+            <div style="display:flex;gap:6px;margin-top:8px">
+                <button onclick="memStore()" style="flex:1;padding:6px;background:rgba(124,92,255,.15);border:1px solid rgba(124,92,255,.25);border-radius:8px;color:#b39ddb;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">MS</button>
+                <button onclick="memRecall()" style="flex:1;padding:6px;background:rgba(124,92,255,.15);border:1px solid rgba(124,92,255,.25);border-radius:8px;color:#b39ddb;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">MR</button>
+                <button onclick="memClear()" style="flex:1;padding:6px;background:rgba(255,93,108,.1);border:1px solid rgba(255,93,108,.2);border-radius:8px;color:#ff91a0;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">MC</button>
+                <button onclick="memAdd()" style="flex:1;padding:6px;background:rgba(37,194,110,.1);border:1px solid rgba(37,194,110,.2);border-radius:8px;color:#6ef0a1;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">M+</button>
+                <div id="mem-indicator" style="flex:1;padding:6px;background:rgba(255,255,255,.05);border-radius:8px;color:#9fb0d0;font-size:11px;font-weight:700;text-align:center">M=0</div>
+            </div>
+        </div>
+
+        <!-- دکمه‌های حالت -->
+        <div class="glass-card" style="padding:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+                <button onclick="setMode('basic')" id="mode-basic" class="mode-btn active-mode">پایه</button>
+                <button onclick="setMode('sci')" id="mode-sci" class="mode-btn">مهندسی</button>
+                <button onclick="setMode('pharma')" id="mode-pharma" class="mode-btn">دارویی</button>
+            </div>
+        </div>
+
+        <!-- کیبورد پایه -->
+        <div class="glass-card" style="padding:16px" id="keyboard-basic">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+                <!-- ردیف ۱ -->
+                <button onclick="clearAll()" class="cb cb-danger">C</button>
+                <button onclick="toggleSign()" class="cb cb-func">+/-</button>
+                <button onclick="percent()" class="cb cb-func">%</button>
+                <button onclick="inputOp('/')" class="cb cb-op">÷</button>
+                <!-- ردیف ۲ -->
+                <button onclick="inputNum('7')" class="cb cb-num">۷</button>
+                <button onclick="inputNum('8')" class="cb cb-num">۸</button>
+                <button onclick="inputNum('9')" class="cb cb-num">۹</button>
+                <button onclick="inputOp('*')" class="cb cb-op">×</button>
+                <!-- ردیف ۳ -->
+                <button onclick="inputNum('4')" class="cb cb-num">۴</button>
+                <button onclick="inputNum('5')" class="cb cb-num">۵</button>
+                <button onclick="inputNum('6')" class="cb cb-num">۶</button>
+                <button onclick="inputOp('-')" class="cb cb-op">−</button>
+                <!-- ردیف ۴ -->
+                <button onclick="inputNum('1')" class="cb cb-num">۱</button>
+                <button onclick="inputNum('2')" class="cb cb-num">۲</button>
+                <button onclick="inputNum('3')" class="cb cb-num">۳</button>
+                <button onclick="inputOp('+')" class="cb cb-op">+</button>
+                <!-- ردیف ۵ -->
+                <button onclick="inputNum('0')" class="cb cb-num" style="grid-column:span 2">۰</button>
+                <button onclick="inputDot()" class="cb cb-num">.</button>
+                <button onclick="calculate()" class="cb cb-eq">=</button>
+                <!-- ردیف ۶ -->
+                <button onclick="backspace()" class="cb cb-func" style="grid-column:span 2">⌫ پاک</button>
+                <button onclick="inputOp('**2')" class="cb cb-func">x²</button>
+                <button onclick="inputOp('**0.5')" class="cb cb-func">√</button>
+            </div>
+        </div>
+
+        <!-- کیبورد مهندسی -->
+        <div class="glass-card" style="padding:16px;display:none" id="keyboard-sci">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+                <button onclick="sciFunc('sin')" class="cb cb-sci">sin</button>
+                <button onclick="sciFunc('cos')" class="cb cb-sci">cos</button>
+                <button onclick="sciFunc('tan')" class="cb cb-sci">tan</button>
+                <button onclick="sciFunc('asin')" class="cb cb-sci">sin⁻¹</button>
+                <button onclick="sciFunc('acos')" class="cb cb-sci">cos⁻¹</button>
+                <button onclick="sciFunc('atan')" class="cb cb-sci">tan⁻¹</button>
+                <button onclick="sciFunc('log')" class="cb cb-sci">log</button>
+                <button onclick="sciFunc('ln')" class="cb cb-sci">ln</button>
+                <button onclick="sciFunc('exp')" class="cb cb-sci">eˣ</button>
+                <button onclick="sciFunc('pow10')" class="cb cb-sci">10ˣ</button>
+                <button onclick="sciFunc('inv')" class="cb cb-sci">1/x</button>
+                <button onclick="sciFunc('abs')" class="cb cb-sci">|x|</button>
+                <button onclick="inputConst('Math.PI')" class="cb cb-sci">π</button>
+                <button onclick="inputConst('Math.E')" class="cb cb-sci">e</button>
+                <button onclick="sciFunc('fact')" class="cb cb-sci">n!</button>
+                <button onclick="sciFunc('cbrt')" class="cb cb-sci">∛</button>
+                <!-- ردیف عددی کوچک -->
+                <button onclick="clearAll()" class="cb cb-danger">C</button>
+                <button onclick="backspace()" class="cb cb-func">⌫</button>
+                <button onclick="inputOp('/')" class="cb cb-op">÷</button>
+                <button onclick="inputOp('*')" class="cb cb-op">×</button>
+                <button onclick="inputNum('7')" class="cb cb-num">۷</button>
+                <button onclick="inputNum('8')" class="cb cb-num">۸</button>
+                <button onclick="inputNum('9')" class="cb cb-num">۹</button>
+                <button onclick="inputOp('-')" class="cb cb-op">−</button>
+                <button onclick="inputNum('4')" class="cb cb-num">۴</button>
+                <button onclick="inputNum('5')" class="cb cb-num">۵</button>
+                <button onclick="inputNum('6')" class="cb cb-num">۶</button>
+                <button onclick="inputOp('+')" class="cb cb-op">+</button>
+                <button onclick="inputNum('1')" class="cb cb-num">۱</button>
+                <button onclick="inputNum('2')" class="cb cb-num">۲</button>
+                <button onclick="inputNum('3')" class="cb cb-num">۳</button>
+                <button onclick="calculate()" class="cb cb-eq" style="grid-row:span 2">=</button>
+                <button onclick="inputNum('0')" class="cb cb-num" style="grid-column:span 2">۰</button>
+                <button onclick="inputDot()" class="cb cb-num">.</button>
+            </div>
+            <div style="margin-top:8px;padding:8px;background:rgba(56,189,248,.06);border-radius:10px;font-size:11px;color:#7dd3fc">
+                توابع مثلثاتی بر اساس رادیان محاسبه می‌شوند. برای درجه ÷ (π/180) کنید.
+            </div>
+        </div>
+    </div>
+
+    <!-- ستون راست — محاسبات دارویی -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- تب‌های دارویی -->
+        <div class="glass-card" style="padding:20px" id="pharma-panel">
+            <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+                <button onclick="setPharmaTab('dose')" id="ptab-dose" class="ptab active-ptab">💊 دوز دارو</button>
+                <button onclick="setPharmaTab('iv')" id="ptab-iv" class="ptab">💧 سرم/قطره</button>
+                <button onclick="setPharmaTab('bmi')" id="ptab-bmi" class="ptab">⚖️ BMI</button>
+                <button onclick="setPharmaTab('renal')" id="ptab-renal" class="ptab">🫘 کلیه</button>
+                <button onclick="setPharmaTab('dilute')" id="ptab-dilute" class="ptab">🧪 رقت‌سازی</button>
+                <button onclick="setPharmaTab('convert')" id="ptab-convert" class="ptab">🔄 تبدیل واحد</button>
+            </div>
+
+            <!-- ── دوز دارو ── -->
+            <div id="tab-dose">
+                <h3 style="color:#fff;font-size:15px;margin-bottom:16px">محاسبه دوز دارو</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div>
+                        <label class="form-label">وزن بیمار (kg)</label>
+                        <input type="number" id="dose-weight" class="form-control" placeholder="مثال: 70" step="0.1">
+                    </div>
+                    <div>
+                        <label class="form-label">دوز دارو (mg/kg)</label>
+                        <input type="number" id="dose-per-kg" class="form-control" placeholder="مثال: 5" step="0.01">
+                    </div>
+                    <div>
+                        <label class="form-label">تعداد دوز در روز</label>
+                        <input type="number" id="dose-freq" class="form-control" placeholder="مثال: 3" value="1">
+                    </div>
+                    <div>
+                        <label class="form-label">تعداد روز</label>
+                        <input type="number" id="dose-days" class="form-control" placeholder="مثال: 7" value="1">
+                    </div>
+                </div>
+                <button onclick="calcDose()" class="btn btn-primary" style="width:100%;margin-top:12px">محاسبه دوز</button>
+                <div id="dose-result" style="display:none;margin-top:14px"></div>
+            </div>
+
+            <!-- ── سرم/قطره IV ── -->
+            <div id="tab-iv" style="display:none">
+                <h3 style="color:#fff;font-size:15px;margin-bottom:16px">محاسبه سرعت قطره / سرم IV</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div>
+                        <label class="form-label">حجم کل (mL)</label>
+                        <input type="number" id="iv-volume" class="form-control" placeholder="مثال: 500">
+                    </div>
+                    <div>
+                        <label class="form-label">مدت زمان تزریق (ساعت)</label>
+                        <input type="number" id="iv-time" class="form-control" placeholder="مثال: 8" step="0.5">
+                    </div>
+                    <div>
+                        <label class="form-label">ضریب ست (قطره/mL)</label>
+                        <select id="iv-set" class="form-select">
+                            <option value="20">ست معمولی (20 قطره/mL)</option>
+                            <option value="60">ست میکرو (60 قطره/mL)</option>
+                            <option value="15">ست خون (15 قطره/mL)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">غلظت دارو (mg/mL) — اختیاری</label>
+                        <input type="number" id="iv-conc" class="form-control" placeholder="اختیاری" step="0.1">
+                    </div>
+                </div>
+                <button onclick="calcIV()" class="btn btn-info" style="width:100%;margin-top:12px">محاسبه</button>
+                <div id="iv-result" style="display:none;margin-top:14px"></div>
+            </div>
+
+            <!-- ── BMI ── -->
+            <div id="tab-bmi" style="display:none">
+                <h3 style="color:#fff;font-size:15px;margin-bottom:16px">محاسبه BMI و وزن ایده‌آل</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div>
+                        <label class="form-label">وزن (kg)</label>
+                        <input type="number" id="bmi-weight" class="form-control" placeholder="مثال: 75" step="0.1">
+                    </div>
+                    <div>
+                        <label class="form-label">قد (cm)</label>
+                        <input type="number" id="bmi-height" class="form-control" placeholder="مثال: 175">
+                    </div>
+                    <div>
+                        <label class="form-label">سن (سال)</label>
+                        <input type="number" id="bmi-age" class="form-control" placeholder="مثال: 35">
+                    </div>
+                    <div>
+                        <label class="form-label">جنسیت</label>
+                        <select id="bmi-gender" class="form-select">
+                            <option value="m">مرد</option>
+                            <option value="f">زن</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="calcBMI()" class="btn btn-success" style="width:100%;margin-top:12px">محاسبه BMI</button>
+                <div id="bmi-result" style="display:none;margin-top:14px"></div>
+            </div>
+
+            <!-- ── کلیه / کلیرانس ── -->
+            <div id="tab-renal" style="display:none">
+                <h3 style="color:#fff;font-size:15px;margin-bottom:16px">محاسبه کلیرانس کراتینین (Cockroft-Gault)</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div>
+                        <label class="form-label">سن (سال)</label>
+                        <input type="number" id="cr-age" class="form-control" placeholder="مثال: 60">
+                    </div>
+                    <div>
+                        <label class="form-label">وزن (kg)</label>
+                        <input type="number" id="cr-weight" class="form-control" placeholder="مثال: 70" step="0.1">
+                    </div>
+                    <div>
+                        <label class="form-label">کراتینین سرم (mg/dL)</label>
+                        <input type="number" id="cr-scr" class="form-control" placeholder="مثال: 1.2" step="0.01">
+                    </div>
+                    <div>
+                        <label class="form-label">جنسیت</label>
+                        <select id="cr-gender" class="form-select">
+                            <option value="m">مرد</option>
+                            <option value="f">زن</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="calcRenal()" class="btn btn-warning" style="width:100%;margin-top:12px">محاسبه GFR</button>
+                <div id="renal-result" style="display:none;margin-top:14px"></div>
+            </div>
+
+            <!-- ── رقت‌سازی ── -->
+            <div id="tab-dilute" style="display:none">
+                <h3 style="color:#fff;font-size:15px;margin-bottom:16px">محاسبه رقت‌سازی (C₁V₁ = C₂V₂)</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div>
+                        <label class="form-label">غلظت اولیه C₁</label>
+                        <input type="number" id="dil-c1" class="form-control" placeholder="مثال: 100" step="0.001">
+                    </div>
+                    <div>
+                        <label class="form-label">حجم اولیه V₁ (mL)</label>
+                        <input type="number" id="dil-v1" class="form-control" placeholder="مثال: 10" step="0.01">
+                    </div>
+                    <div>
+                        <label class="form-label">غلظت نهایی C₂</label>
+                        <input type="number" id="dil-c2" class="form-control" placeholder="مثال: 20" step="0.001">
+                    </div>
+                    <div>
+                        <label class="form-label">حجم نهایی V₂ (mL) — اختیاری</label>
+                        <input type="number" id="dil-v2" class="form-control" placeholder="محاسبه می‌شود" step="0.01">
+                    </div>
+                </div>
+                <div style="font-size:12px;color:#9fb0d0;margin-top:8px;padding:8px;background:rgba(255,255,255,.03);border-radius:8px">
+                    یکی از V₂ یا C₂ را خالی بگذارید تا محاسبه شود.
+                </div>
+                <button onclick="calcDilute()" class="btn btn-info" style="width:100%;margin-top:12px">محاسبه</button>
+                <div id="dilute-result" style="display:none;margin-top:14px"></div>
+            </div>
+
+            <!-- ── تبدیل واحد ── -->
+            <div id="tab-convert" style="display:none">
+                <h3 style="color:#fff;font-size:15px;margin-bottom:16px">تبدیل واحد</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div style="grid-column:1/-1">
+                        <label class="form-label">نوع تبدیل</label>
+                        <select id="conv-type" class="form-select" onchange="updateConvUnits()">
+                            <option value="weight">وزن</option>
+                            <option value="volume">حجم</option>
+                            <option value="temp">دما</option>
+                            <option value="pressure">فشار خون / mmHg</option>
+                            <option value="conc">غلظت دارو</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">مقدار</label>
+                        <input type="number" id="conv-value" class="form-control" placeholder="مقدار" step="any">
+                    </div>
+                    <div>
+                        <label class="form-label">از واحد</label>
+                        <select id="conv-from" class="form-select"></select>
+                    </div>
+                    <div>
+                        <label class="form-label">به واحد</label>
+                        <select id="conv-to" class="form-select"></select>
+                    </div>
+                </div>
+                <button onclick="calcConvert()" class="btn btn-primary" style="width:100%;margin-top:12px">تبدیل</button>
+                <div id="conv-result" style="display:none;margin-top:14px"></div>
+            </div>
+        </div>
+
+        <!-- تاریخچه محاسبات -->
+        <div class="glass-card" style="padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <h4 style="color:#fff;font-size:14px;margin:0">تاریخچه</h4>
+                <button onclick="clearHistory()" style="background:rgba(255,93,108,.1);border:1px solid rgba(255,93,108,.2);border-radius:8px;padding:4px 12px;color:#ff91a0;font-size:11px;cursor:pointer;font-family:inherit">پاک کردن</button>
+            </div>
+            <div id="history-list" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto">
+                <div style="text-align:center;color:#9fb0d0;font-size:12px;padding:20px">تاریخچه‌ای وجود ندارد</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .cb {
+        padding: 14px 8px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        transition: .15s;
+    }
+    
+    .cb:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.12)
+    }
+    
+    .cb:active {
+        transform: scale(.96)
+    }
+    
+    .cb-num {
+        background: rgba(255, 255, 255, .08);
+        color: #e8eefc
+    }
+    
+    .cb-op {
+        background: rgba(91, 140, 255, .2);
+        color: #5b8cff
+    }
+    
+    .cb-func {
+        background: rgba(255, 176, 32, .12);
+        color: #ffb020
+    }
+    
+    .cb-sci {
+        background: rgba(56, 189, 248, .1);
+        color: #38bdf8;
+        font-size: 13px;
+        padding: 12px 6px
+    }
+    
+    .cb-danger {
+        background: rgba(255, 93, 108, .18);
+        color: #ff5d6c
+    }
+    
+    .cb-eq {
+        background: linear-gradient(135deg, #5b8cff, #7c5cff);
+        color: #fff;
+        font-size: 20px
+    }
+    
+    .mode-btn {
+        padding: 8px;
+        border: 1px solid rgba(255, 255, 255, .08);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, .05);
+        color: #9fb0d0;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        transition: .2s;
+    }
+    
+    .mode-btn:hover {
+        background: rgba(124, 92, 255, .15);
+        color: #fff
+    }
+    
+    .active-mode {
+        background: rgba(124, 92, 255, .25)!important;
+        color: #fff!important;
+        border-color: rgba(124, 92, 255, .4)!important
+    }
+    
+    .ptab {
+        padding: 7px 14px;
+        border: 1px solid rgba(255, 255, 255, .08);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, .05);
+        color: #9fb0d0;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        transition: .2s;
+    }
+    
+    .ptab:hover {
+        background: rgba(37, 194, 110, .12);
+        color: #6ef0a1
+    }
+    
+    .active-ptab {
+        background: rgba(37, 194, 110, .2)!important;
+        color: #6ef0a1!important;
+        border-color: rgba(37, 194, 110, .3)!important
+    }
+    
+    .res-card {
+        background: rgba(255, 255, 255, .04);
+        border: 1px solid rgba(255, 255, 255, .08);
+        border-radius: 12px;
+        padding: 14px;
+    }
+    
+    .res-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, .05);
+    }
+    
+    .res-row:last-child {
+        border-bottom: none
+    }
+    
+    .res-label {
+        font-size: 12px;
+        color: #9fb0d0
+    }
+    
+    .res-val {
+        font-size: 14px;
+        font-weight: 700;
+        color: #fff
+    }
+    
+    .res-val.green {
+        color: #25c26e
+    }
+    
+    .res-val.yellow {
+        color: #ffb020
+    }
+    
+    .res-val.red {
+        color: #ff5d6c
+    }
+    
+    .res-val.blue {
+        color: #38bdf8
+    }
+</style>
+{% endblock %} {% block extra_js %}
+<script>
+    // ══ ماشین حساب اصلی ══════════════════════════════════════════
+    let currentInput = '0';
+    let expression = '';
+    let pendingOp = null;
+    let prevValue = null;
+    let justCalc = false;
+    let memory = 0;
+    let history = [];
+    let currentMode = 'basic';
+
+    function updateDisplay() {
+        document.getElementById('main-display').textContent = formatNum(currentInput);
+        document.getElementById('expr-display').textContent = expression || '\u00a0';
+    }
+
+    function formatNum(n) {
+        const num = parseFloat(n);
+        if (isNaN(num)) return n;
+        if (Math.abs(num) > 1e12 || (Math.abs(num) < 1e-6 && num !== 0)) {
+            return num.toExponential(4);
+        }
+        const s = parseFloat(n.toString());
+        if (Number.isInteger(s) && !n.toString().includes('.')) return s.toLocaleString('fa-IR');
+        return parseFloat(parseFloat(n).toPrecision(12)).toString();
+    }
+
+    function inputNum(n) {
+        if (justCalc) {
+            currentInput = n;
+            expression = '';
+            justCalc = false;
+        } else currentInput = currentInput === '0' ? n : currentInput + n;
+        updateDisplay();
+    }
+
+    function inputDot() {
+        if (justCalc) {
+            currentInput = '0.';
+            justCalc = false;
+        } else if (!currentInput.includes('.')) currentInput += '.';
+        updateDisplay();
+    }
+
+    function inputOp(op) {
+        if (op === '**2') {
+            currentInput = String(Math.pow(parseFloat(currentInput), 2));
+            expression = '';
+            updateDisplay();
+            return;
+        }
+        if (op === '**0.5') {
+            currentInput = String(Math.sqrt(parseFloat(currentInput)));
+            expression = '';
+            updateDisplay();
+            return;
+        }
+        if (pendingOp && !justCalc) {
+            const result = applyOp(prevValue, parseFloat(currentInput), pendingOp);
+            addHistory(`${prevValue} ${opSymbol(pendingOp)} ${currentInput}`, result);
+            currentInput = String(result);
+        }
+        prevValue = parseFloat(currentInput);
+        pendingOp = op;
+        expression = `${formatNum(currentInput)} ${opSymbol(op)}`;
+        justCalc = false;
+        currentInput = '0';
+        updateDisplay();
+    }
+
+    function applyOp(a, b, op) {
+        switch (op) {
+            case '+':
+                return a + b;
+            case '-':
+                return a - b;
+            case '*':
+                return a * b;
+            case '/':
+                return b !== 0 ? a / b : NaN;
+            default:
+                return b;
+        }
+    }
+
+    function opSymbol(op) {
+        return {
+            '+': '+',
+            '-': '−',
+            '*': '×',
+            '/': '÷'
+        }[op] || op;
+    }
+
+    function calculate() {
+        if (!pendingOp || prevValue === null) return;
+        const b = parseFloat(currentInput);
+        const result = applyOp(prevValue, b, pendingOp);
+        const expr = `${formatNum(prevValue)} ${opSymbol(pendingOp)} ${formatNum(currentInput)} =`;
+        addHistory(expr, result);
+        expression = expr;
+        currentInput = isNaN(result) ? 'خطا' : String(result);
+        pendingOp = null;
+        prevValue = null;
+        justCalc = true;
+        updateDisplay();
+    }
+
+    function clearAll() {
+        currentInput = '0';
+        expression = '';
+        pendingOp = null;
+        prevValue = null;
+        justCalc = false;
+        updateDisplay();
+    }
+
+    function backspace() {
+        if (justCalc || currentInput.length <= 1) {
+            currentInput = '0';
+        } else currentInput = currentInput.slice(0, -1);
+        updateDisplay();
+    }
+
+    function toggleSign() {
+        currentInput = String(-parseFloat(currentInput));
+        updateDisplay();
+    }
+
+    function percent() {
+        currentInput = String(parseFloat(currentInput) / 100);
+        updateDisplay();
+    }
+
+    // ── توابع علمی ──
+    function sciFunc(fn) {
+        const x = parseFloat(currentInput);
+        let result;
+        switch (fn) {
+            case 'sin':
+                result = Math.sin(x);
+                break;
+            case 'cos':
+                result = Math.cos(x);
+                break;
+            case 'tan':
+                result = Math.tan(x);
+                break;
+            case 'asin':
+                result = Math.asin(x);
+                break;
+            case 'acos':
+                result = Math.acos(x);
+                break;
+            case 'atan':
+                result = Math.atan(x);
+                break;
+            case 'log':
+                result = Math.log10(x);
+                break;
+            case 'ln':
+                result = Math.log(x);
+                break;
+            case 'exp':
+                result = Math.exp(x);
+                break;
+            case 'pow10':
+                result = Math.pow(10, x);
+                break;
+            case 'inv':
+                result = 1 / x;
+                break;
+            case 'abs':
+                result = Math.abs(x);
+                break;
+            case 'cbrt':
+                result = Math.cbrt(x);
+                break;
+            case 'fact':
+                result = factorial(x);
+                break;
+        }
+        addHistory(`${fn}(${x})`, result);
+        currentInput = isNaN(result) ? 'خطا' : String(result);
+        updateDisplay();
+    }
+
+    function factorial(n) {
+        if (n < 0 || !Number.isInteger(n)) return NaN;
+        if (n === 0 || n === 1) return 1;
+        if (n > 170) return Infinity;
+        let r = 1;
+        for (let i = 2; i <= n; i++) r *= i;
+        return r;
+    }
+
+    function inputConst(c) {
+        currentInput = String(eval(c));
+        updateDisplay();
+    }
+
+    // ── حافظه ──
+    function memStore() {
+        memory = parseFloat(currentInput);
+        updateMemDisplay();
+    }
+
+    function memRecall() {
+        currentInput = String(memory);
+        updateDisplay();
+    }
+
+    function memClear() {
+        memory = 0;
+        updateMemDisplay();
+    }
+
+    function memAdd() {
+        memory += parseFloat(currentInput);
+        updateMemDisplay();
+    }
+
+    function updateMemDisplay() {
+        document.getElementById('mem-indicator').textContent = `M=${formatNum(String(memory))}`;
+    }
+
+    // ── تاریخچه ──
+    function addHistory(expr, result) {
+        if (isNaN(result)) return;
+        history.unshift({
+            expr,
+            result
+        });
+        if (history.length > 20) history.pop();
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const el = document.getElementById('history-list');
+        if (!history.length) {
+            el.innerHTML = '<div style="text-align:center;color:#9fb0d0;font-size:12px;padding:20px">تاریخچه‌ای وجود ندارد</div>';
+            return;
+        }
+        el.innerHTML = history.map((h, i) => `
+        <div onclick="currentInput=String(${h.result});updateDisplay()"
+            style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px 10px;cursor:pointer;transition:.15s"
+            onmouseover="this.style.background='rgba(91,140,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.04)'">
+            <div style="font-size:11px;color:#9fb0d0">${h.expr}</div>
+            <div style="font-size:14px;font-weight:700;color:#5b8cff">${formatNum(String(h.result))}</div>
+        </div>`).join('');
+    }
+
+    function clearHistory() {
+        history = [];
+        renderHistory();
+    }
+
+    // ── حالت ──
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode'));
+        document.getElementById(`mode-${mode}`).classList.add('active-mode');
+        document.getElementById('keyboard-basic').style.display = mode === 'basic' ? 'block' : 'none';
+        document.getElementById('keyboard-sci').style.display = mode === 'sci' ? 'block' : 'none';
+        document.getElementById('pharma-panel').style.display = mode === 'pharma' ? 'block' : 'none';
+    }
+
+    // ══ محاسبات دارویی ══════════════════════════════════════════
+
+    // ── تب‌های دارویی ──
+    function setPharmaTab(tab) {
+        ['dose', 'iv', 'bmi', 'renal', 'dilute', 'convert'].forEach(t => {
+            document.getElementById(`tab-${t}`).style.display = 'none';
+            document.getElementById(`ptab-${t}`).classList.remove('active-ptab');
+        });
+        document.getElementById(`tab-${tab}`).style.display = 'block';
+        document.getElementById(`ptab-${tab}`).classList.add('active-ptab');
+    }
+
+    // ── دوز دارو ──
+    function calcDose() {
+        const w = parseFloat(document.getElementById('dose-weight').value);
+        const dpkg = parseFloat(document.getElementById('dose-per-kg').value);
+        const freq = parseFloat(document.getElementById('dose-freq').value) || 1;
+        const days = parseFloat(document.getElementById('dose-days').value) || 1;
+        const el = document.getElementById('dose-result');
+
+        if (!w || !dpkg) {
+            showError(el, 'وزن و دوز kg را وارد کنید.');
+            return;
+        }
+
+        const singleDose = w * dpkg;
+        const dailyDose = singleDose * freq;
+        const totalCourse = dailyDose * days;
+
+        el.style.display = 'block';
+        el.innerHTML = `<div class="res-card">
+        <div class="res-row"><span class="res-label">دوز هر نوبت</span><span class="res-val green">${singleDose.toFixed(2)} mg</span></div>
+        <div class="res-row"><span class="res-label">دوز روزانه (${freq}× در روز)</span><span class="res-val blue">${dailyDose.toFixed(2)} mg/day</span></div>
+        <div class="res-row"><span class="res-label">دوز کل دوره (${days} روز)</span><span class="res-val yellow">${totalCourse.toFixed(2)} mg</span></div>
+        <div class="res-row"><span class="res-label">دوز کل دوره (گرم)</span><span class="res-val">${(totalCourse/1000).toFixed(3)} g</span></div>
+    </div>`;
+    }
+
+    // ── سرم IV ──
+    function calcIV() {
+        const vol = parseFloat(document.getElementById('iv-volume').value);
+        const time = parseFloat(document.getElementById('iv-time').value);
+        const set = parseFloat(document.getElementById('iv-set').value);
+        const conc = parseFloat(document.getElementById('iv-conc').value) || 0;
+        const el = document.getElementById('iv-result');
+
+        if (!vol || !time) {
+            showError(el, 'حجم و زمان را وارد کنید.');
+            return;
+        }
+
+        const mlPerHr = vol / time;
+        const drops = (vol * set) / (time * 60);
+        const totalMg = conc ? vol * conc : null;
+
+        el.style.display = 'block';
+        el.innerHTML = `<div class="res-card">
+        <div class="res-row"><span class="res-label">سرعت تزریق</span><span class="res-val green">${mlPerHr.toFixed(1)} mL/hr</span></div>
+        <div class="res-row"><span class="res-label">تعداد قطره در دقیقه</span><span class="res-val blue">${drops.toFixed(1)} gtt/min</span></div>
+        ${totalMg !== null ? `<div class="res-row"><span class="res-label">مقدار کل دارو</span><span class="res-val yellow">${totalMg.toFixed(1)} mg</span></div>
+        <div class="res-row"><span class="res-label">سرعت دارو</span><span class="res-val">${(totalMg/(time*60)).toFixed(2)} mg/min</span></div>` : ''}
+    </div>`;
+}
+
+// ── BMI ──
+function calcBMI() {
+    const w   = parseFloat(document.getElementById('bmi-weight').value);
+    const h   = parseFloat(document.getElementById('bmi-height').value) / 100;
+    const age = parseFloat(document.getElementById('bmi-age').value) || 30;
+    const sex = document.getElementById('bmi-gender').value;
+    const el  = document.getElementById('bmi-result');
+
+    if (!w || !h) { showError(el, 'وزن و قد را وارد کنید.'); return; }
+
+    const bmi = w / (h * h);
+    const ibwM = 50 + 2.3 * ((h * 100 / 2.54) - 60);
+    const ibwF = 45.5 + 2.3 * ((h * 100 / 2.54) - 60);
+    const ibw  = sex === 'm' ? ibwM : ibwF;
+
+    let cat, catClass;
+    if      (bmi < 18.5) { cat = 'کم‌وزن';         catClass = 'yellow'; }
+    else if (bmi < 25)   { cat = 'طبیعی';           catClass = 'green';  }
+    else if (bmi < 30)   { cat = 'اضافه‌وزن';       catClass = 'yellow'; }
+    else if (bmi < 35)   { cat = 'چاقی درجه ۱';    catClass = 'red';    }
+    else if (bmi < 40)   { cat = 'چاقی درجه ۲';    catClass = 'red';    }
+    else                  { cat = 'چاقی مرضی';       catClass = 'red';    }
+
+    // BSA (Mosteller)
+    const bsa = Math.sqrt((h * 100 * w) / 3600);
+
+    el.style.display = 'block';
+    el.innerHTML = `<div class="res-card">
+        <div class="res-row"><span class="res-label">BMI</span><span class="res-val ${catClass}">${bmi.toFixed(2)} kg/m²</span></div>
+        <div class="res-row"><span class="res-label">وضعیت</span><span class="res-val ${catClass}">${cat}</span></div>
+        <div class="res-row"><span class="res-label">وزن ایده‌آل (IBW)</span><span class="res-val blue">${ibw.toFixed(1)} kg</span></div>
+        <div class="res-row"><span class="res-label">سطح بدن (BSA - Mosteller)</span><span class="res-val">${bsa.toFixed(3)} m²</span></div>
+        <div class="res-row"><span class="res-label">اختلاف وزن با ایده‌آل</span><span class="res-val ${w > ibw ? 'red' : 'green'}">${(w - ibw).toFixed(1)} kg</span></div>
+    </div>`;
+}
+
+// ── کلیرانس کراتینین ──
+function calcRenal() {
+    const age = parseFloat(document.getElementById('cr-age').value);
+    const w   = parseFloat(document.getElementById('cr-weight').value);
+    const scr = parseFloat(document.getElementById('cr-scr').value);
+    const sex = document.getElementById('cr-gender').value;
+    const el  = document.getElementById('renal-result');
+
+    if (!age || !w || !scr) { showError(el, 'همه مقادیر را وارد کنید.'); return; }
+
+    let crcl = ((140 - age) * w) / (72 * scr);
+    if (sex === 'f') crcl *= 0.85;
+
+    let stage, cls;
+    if      (crcl >= 90)  { stage = 'G1 — عملکرد طبیعی'; cls = 'green'; }
+    else if (crcl >= 60)  { stage = 'G2 — کاهش خفیف';    cls = 'green'; }
+    else if (crcl >= 45)  { stage = 'G3a — کاهش ملایم';  cls = 'yellow';}
+    else if (crcl >= 30)  { stage = 'G3b — کاهش متوسط';  cls = 'yellow';}
+    else if (crcl >= 15)  { stage = 'G4 — کاهش شدید';    cls = 'red';   }
+    else                   { stage = 'G5 — نارسایی کلیه'; cls = 'red';   }
+
+    el.style.display = 'block';
+    el.innerHTML = `<div class="res-card">
+        <div class="res-row"><span class="res-label">کلیرانس کراتینین (CrCl)</span><span class="res-val ${cls}">${crcl.toFixed(1)} mL/min</span></div>
+        <div class="res-row"><span class="res-label">مرحله بیماری کلیوی</span><span class="res-val ${cls}">${stage}</span></div>
+        <div class="res-row"><span class="res-label">نیاز به تنظیم دوز</span><span class="res-val ${crcl < 50 ? 'red' : 'green'}">${crcl < 50 ? 'بله — مشورت با پزشک' : 'معمولاً نه'}</span></div>
+    </div>
+    <div style="margin-top:8px;padding:8px;background:rgba(255,176,32,.06);border-radius:8px;font-size:11px;color:#fcd34d">
+        فرمول Cockcroft-Gault. برای بیماران بستری یا چاق از وزن تنظیم‌شده استفاده کنید.
+    </div>`;
+}
+
+// ── رقت‌سازی ──
+function calcDilute() {
+    const c1 = parseFloat(document.getElementById('dil-c1').value);
+    const v1 = parseFloat(document.getElementById('dil-v1').value);
+    const c2 = parseFloat(document.getElementById('dil-c2').value);
+    const v2 = parseFloat(document.getElementById('dil-v2').value);
+    const el = document.getElementById('dilute-result');
+
+    if (!c1 || !v1) { showError(el, 'C₁ و V₁ الزامی هستند.'); return; }
+
+    let resV2, resC2, solvent;
+    if (!v2 && c2) {
+        resV2   = (c1 * v1) / c2;
+        solvent = resV2 - v1;
+        el.style.display = 'block';
+        el.innerHTML = `<div class="res-card">
+            <div class="res-row"><span class="res-label">حجم نهایی (V₂)</span><span class="res-val green">${resV2.toFixed(3)} mL</span></div>
+            <div class="res-row"><span class="res-label">حجم حلال اضافه‌شده</span><span class="res-val blue">${solvent.toFixed(3)} mL</span></div>
+        </div>`;
+    } else if (v2 && !c2) {
+        resC2 = (c1 * v1) / v2;
+        el.style.display = 'block';
+        el.innerHTML = `<div class="res-card">
+            <div class="res-row"><span class="res-label">غلظت نهایی (C₂)</span><span class="res-val green">${resC2.toFixed(4)}</span></div>
+            <div class="res-row"><span class="res-label">فاکتور رقت</span><span class="res-val blue">1:${(v2/v1).toFixed(2)}</span></div>
+        </div>`;
+    } else {
+        showError(el, 'یکی از V₂ یا C₂ را خالی بگذارید.');
+    }
+}
+
+// ── تبدیل واحد ──
+const convUnits = {
+    weight:   ['mg','g','kg','mcg (µg)','lb','oz'],
+    volume:   ['mL','L','cc','fl oz','tsp','tbsp'],
+    temp:     ['سانتیگراد (°C)','فارنهایت (°F)','کلوین (K)'],
+    pressure: ['mmHg','kPa','cmH₂O','atm'],
+    conc:     ['mg/mL','mg/dL','g/dL','µg/mL','mEq/L','mmol/L'],
+};
+
+function updateConvUnits() {
+    const type = document.getElementById('conv-type').value;
+    const units = convUnits[type];
+    ['conv-from','conv-to'].forEach(id => {
+        const sel = document.getElementById(id);
+        sel.innerHTML = units.map(u => `<option value="${u}">${u}</option>`).join('');
+    });
+    document.getElementById('conv-to').selectedIndex = 1;
+}
+
+function calcConvert() {
+    const val  = parseFloat(document.getElementById('conv-value').value);
+    const from = document.getElementById('conv-from').value;
+    const to   = document.getElementById('conv-to').value;
+    const type = document.getElementById('conv-type').value;
+    const el   = document.getElementById('conv-result');
+
+    if (isNaN(val)) { showError(el, 'مقدار عددی وارد کنید.'); return; }
+
+    let result;
+
+    if (type === 'weight') {
+        const toMg = {'mg':1,'g':1000,'kg':1e6,'mcg (µg)':0.001,'lb':453592,'oz':28349.5};
+        result = val * toMg[from] / toMg[to];
+    } else if (type === 'volume') {
+        const toML = {'mL':1,'L':1000,'cc':1,'fl oz':29.5735,'tsp':4.92892,'tbsp':14.7868};
+        result = val * toML[from] / toML[to];
+    } else if (type === 'temp') {
+        let inC;
+        if (from === 'سانتیگراد (°C)') inC = val;
+        else if (from === 'فارنهایت (°F)') inC = (val - 32) * 5/9;
+        else inC = val - 273.15;
+        if (to === 'سانتیگراد (°C)') result = inC;
+        else if (to === 'فارنهایت (°F)') result = inC * 9/5 + 32;
+        else result = inC + 273.15;
+    } else if (type === 'pressure') {
+        const toMmHg = {'mmHg':1,'kPa':7.50062,'cmH₂O':0.73556,'atm':760};
+        result = val * toMmHg[from] / toMmHg[to];
+    } else {
+        el.style.display = 'block';
+        el.innerHTML = `<div class="res-card"><div class="res-row"><span class="res-label">نتیجه</span><span class="res-val green">تبدیل غلظت نیاز به اطلاعات مولکولی دارد</span></div></div>`;
+        return;
+    }
+
+    el.style.display = 'block';
+    el.innerHTML = `<div class="res-card">
+        <div class="res-row">
+            <span class="res-label">${val} ${from}</span>
+            <span class="res-val green">${result.toPrecision(6)} ${to}</span>
+        </div>
+    </div>`;
+}
+
+// ── کمکی ──
+function showError(el, msg) {
+    el.style.display = 'block';
+    el.innerHTML = `<div class="alert alert-danger">${msg}</div>`;
+}
+
+// ── init ──
+updateConvUnits();
+updateDisplay();
+
+// ── کیبورد فیزیکی ──
+document.addEventListener('keydown', e => {
+    if (['0','1','2','3','4','5','6','7','8','9'].includes(e.key)) inputNum(e.key);
+    else if (e.key === '.') inputDot();
+    else if (e.key === '+') inputOp('+');
+    else if (e.key === '-') inputOp('-');
+    else if (e.key === '*') inputOp('*');
+    else if (e.key === '/') { e.preventDefault(); inputOp('/'); }
+    else if (e.key === 'Enter' || e.key === '=') calculate();
+    else if (e.key === 'Escape') clearAll();
+    else if (e.key === 'Backspace') backspace();
+});
+</script>
+{% endblock %} {% endblock %}

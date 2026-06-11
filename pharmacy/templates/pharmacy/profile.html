@@ -1,0 +1,73 @@
+{% extends "pharmacy/base.html" %} {% block title %}پروفایل من{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>پروفایل من</h4>
+        <span class="sub">ویرایش اطلاعات شخصی</span>
+    </div>
+    <div class="topbar-actions">
+        <a href="{% url 'avatar_select' %}" class="btn btn-secondary">🖼 تغییر آواتار</a>
+        <a href="{% url 'change_password' %}" class="btn btn-secondary">🔒 تغییر رمز</a>
+    </div>
+</div>
+
+{% if messages %}{% for m in messages %}
+<div class="alert alert-{{ m.tags }}" style="margin-bottom:16px">{{ m }}</div>{% endfor %}{% endif %}
+
+<div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start">
+    <div class="glass-card" style="padding:24px;text-align:center">
+        {% if user.profile_image %}
+        <img src="{{ user.profile_image.url }}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid rgba(91,140,255,.3);margin-bottom:16px"> {% else %}
+        <div style="width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#5b8cff,#7c5cff);display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 16px">
+            {% if user.avatar_type == 'doctor' %}👨‍⚕️ {% elif user.avatar_type == 'pharmacist' %}💊 {% elif user.avatar_type == 'chemist' %}🔬 {% elif user.avatar_type == 'accountant' %}📊 {% else %}👤{% endif %}
+        </div>
+        {% endif %}
+        <div style="font-size:18px;font-weight:700;color:#fff">{{ user.get_full_name|default:user.username }}</div>
+        <div style="font-size:13px;color:#9fb0d0;margin-top:4px">{{ user.get_account_type_display|default:"پرسنل" }}</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px">{{ user.pharmacy_name|default:"" }}</div>
+    </div>
+
+    <div class="glass-card" style="padding:28px">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div>
+                    <label class="form-label">نام</label>
+                    <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+                </div>
+                <div>
+                    <label class="form-label">نام خانوادگی</label>
+                    <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+                </div>
+                <div>
+                    <label class="form-label">ایمیل</label>
+                    <input type="email" name="email" class="form-control" value="{{ user.email }}">
+                </div>
+                <div>
+                    <label class="form-label">شماره تلفن</label>
+                    <input type="text" name="phone" class="form-control" value="{{ user.phone|default:'' }}">
+                </div>
+                <div>
+                    <label class="form-label">نام داروخانه</label>
+                    <input type="text" name="pharmacy_name" class="form-control" value="{{ user.pharmacy_name|default:'' }}">
+                </div>
+                <div>
+                    <label class="form-label">کد پستی</label>
+                    <input type="text" name="postal_code" class="form-control" value="{{ user.postal_code|default:'' }}">
+                </div>
+                <div style="grid-column:1/-1">
+                    <label class="form-label">آدرس</label>
+                    <textarea name="address" class="form-control" style="min-height:80px">{{ user.address|default:'' }}</textarea>
+                </div>
+                <div style="grid-column:1/-1">
+                    <label class="form-label">تصویر پروفایل</label>
+                    <input type="file" name="profile_image" class="form-control" accept="image/*">
+                </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:20px">
+                <button type="submit" class="btn btn-primary">💾 ذخیره تغییرات</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

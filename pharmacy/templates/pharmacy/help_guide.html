@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>راهنمای استفاده از سیستم مدیریت داروخانه</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+        
+         :root {
+            --bg: #060b14;
+            --surface: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #5b8cff;
+            --accent2: #a78bfa;
+            --accent3: #25c26e;
+            --text: #e8edf5;
+            --muted: #7a8ba8;
+            --danger: #ff5d6c;
+            --warn: #ffb020;
+        }
+        
+        html {
+            scroll-behavior: smooth
+        }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 20% 0%, rgba(91, 140, 255, .12) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 100%, rgba(167, 139, 250, .10) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0
+        }
+        
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 24px 60px
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(91, 140, 255, .1);
+            border: 1px solid rgba(91, 140, 255, .3);
+            color: var(--accent);
+            font-size: 12px;
+            padding: 6px 16px;
+            border-radius: 999px;
+            margin-bottom: 32px;
+            letter-spacing: .04em
+        }
+        
+        .badge::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite
+        }
+        
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1)
+            }
+            50% {
+                opacity: .4;
+                transform: scale(1.4)
+            }
+        }
+        
+        .hero-tag {
+            font-size: 11px;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 20px
+        }
+        
+        h1 {
+            font-size: clamp(36px, 7vw, 76px);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -.02em;
+            margin-bottom: 8px
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #5b8cff 0%, #a78bfa 50%, #5b8cff 100%);
+            background-size: 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s linear infinite
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: 0% 50%
+            }
+            100% {
+                background-position: 200% 50%
+            }
+        }
+        
+        .hero-sub {
+            font-size: clamp(14px, 2.2vw, 18px);
+            color: var(--muted);
+            max-width: 620px;
+            line-height: 2;
+            margin-bottom: 48px
+        }
+        
+        .hero-meta {
+            display: flex;
+            gap: 32px;
+            justify-content: center;
+            flex-wrap: wrap
+        }
+        
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px
+        }
+        
+        .meta-item .val {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text)
+        }
+        
+        .meta-item .lbl {
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: .06em
+        }
+        
+        .divider {
+            width: 1px;
+            height: 36px;
+            background: var(--border);
+            align-self: center
+        }
+        
+        .scroll-hint {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 11px;
+            letter-spacing: .08em;
+            animation: fadeInUp 1s ease 1s both
+        }
+        
+        .scroll-hint .arrow {
+            width: 20px;
+            height: 20px;
+            border-left: 2px solid var(--muted);
+            border-bottom: 2px solid var(--muted);
+            transform: rotate(-45deg);
+            animation: bounce 2s infinite
+        }
+        
+        @keyframes bounce {
+            0%,
+            100% {
+                transform: translateY(0) rotate(-45deg)
+            }
+            50% {
+                transform: translateY(6px) rotate(-45deg)
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 20px)
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0)
+            }
+        }
+        
+        .section {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 80px 24px
+        }
+        
+        .section-label {
+            font-size: 11px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 12px
+        }
+        
+        .section-title {
+            font-size: clamp(26px, 4vw, 40px);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 16px
+        }
+        
+        .section-desc {
+            font-size: 15px;
+            color: var(--muted);
+            line-height: 1.9;
+            max-width: 680px;
+            margin-bottom: 48px
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px
+        }
+        
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            transition: transform .2s, border-color .2s, background .2s;
+            position: relative;
+            overflow: hidden
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 0% 0%, rgba(91, 140, 255, .07), transparent 70%);
+            opacity: 0;
+            transition: opacity .3s
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(91, 140, 255, .3);
+            background: rgba(255, 255, 255, .06)
+        }
+        
+        .feature-card:hover::before {
+            opacity: 1
+        }
+        
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px
+        }
+        
+        .feature-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text)
+        }
+        
+        .feature-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.9
+        }
+        
+        .ai-block {
+            background: linear-gradient(135deg, rgba(91, 140, 255, .08) 0%, rgba(167, 139, 250, .08) 100%);
+            border: 1px solid rgba(91, 140, 255, .2);
+            border-radius: 24px;
+            padding: 48px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            margin-bottom: 80px;
+            position: relative;
+            overflow: hidden
+        }
+        
+        .ai-block::after {
+            content: 'AI';
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 200px;
+            font-weight: 900;
+            color: rgba(91, 140, 255, .04);
+            pointer-events: none;
+            line-height: 1
+        }
+        
+        .ai-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(167, 139, 250, .15);
+            color: var(--accent2);
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-bottom: 16px;
+            letter-spacing: .06em
+        }
+        
+        .ai-title {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 16px
+        }
+        
+        .ai-desc {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 2
+        }
+        
+        .chat-mock {
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+        
+        .chat-msg {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1.7
+        }
+        
+        .chat-msg.user {
+            align-self: flex-end;
+            background: rgba(91, 140, 255, .2);
+            border: 1px solid rgba(91, 140, 255, .3);
+            color: #c8d9ff;
+            border-bottom-right-radius: 4px
+        }
+        
+        .chat-msg.bot {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-bottom-left-radius: 4px
+        }
+        
+        .chat-msg.bot .model-tag {
+            font-size: 10px;
+            color: var(--accent2);
+            letter-spacing: .06em;
+            margin-bottom: 4px
+        }
+        /* steps */
+        
+        .steps-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0
+        }
+        
+        .step-item {
+            display: grid;
+            grid-template-columns: 60px 1fr;
+            gap: 24px;
+            align-items: start;
+            padding: 28px 0;
+            border-bottom: 1px solid var(--border)
+        }
+        
+        .step-item:last-child {
+            border-bottom: none
+        }
+        
+        .step-num {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(91, 140, 255, .2), rgba(167, 139, 250, .2));
+            border: 1px solid rgba(91, 140, 255, .25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--accent);
+            flex-shrink: 0
+        }
+        
+        .step-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px
+        }
+        
+        .step-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.9
+        }
+        
+        .tip-box {
+            background: rgba(37, 194, 110, .06);
+            border: 1px solid rgba(37, 194, 110, .18);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            gap: 14px;
+            align-items: start;
+            margin-top: 16px
+        }
+        
+        .tip-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 2px
+        }
+        
+        .tip-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, .7);
+            line-height: 1.9
+        }
+        
+        .warn-box {
+            background: rgba(255, 176, 32, .06);
+            border: 1px solid rgba(255, 176, 32, .18);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            gap: 14px;
+            align-items: start;
+            margin-top: 16px
+        }
+        
+        .warn-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, .7);
+            line-height: 1.9
+        }
+        
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: .04em
+        }
+        
+        @media(max-width:700px) {
+            .ai-block {
+                grid-template-columns: 1fr
+            }
+            .ai-block::after {
+                display: none
+            }
+            .hero-meta {
+                gap: 20px
+            }
+            .divider {
+                display: none
+            }
+            .step-item {
+                grid-template-columns: 1fr
+            }
+            .step-num {
+                margin-bottom: 8px
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="badge">راهنمای جامع سیستم</div>
+        <div class="hero-tag">مدیریت داروخانه — نسخه وب</div>
+        <h1><span class="gradient-text">راهنمای استفاده</span></h1>
+        <p style="font-size:clamp(16px,2.5vw,22px);color:var(--muted);margin-bottom:12px;font-weight:600">سیستم هوشمند مدیریت داروخانه</p>
+        <p class="hero-sub">این راهنما به شما کمک می‌کند تمامی امکانات سیستم را به‌درستی و با بیشترین بهره‌وری استفاده کنید. از اولین ورود تا مدیریت پیشرفته محصولات، دستیار هوشمند دارویی و گزارش‌گیری — همه چیز اینجا توضیح داده شده است.</p>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <span class="val">۹</span>
+                <span class="lbl">بخش اصلی</span>
+            </div>
+            <div class="divider"></div>
+            <div class="meta-item">
+                <span class="val">۲۴/۷</span>
+                <span class="lbl">دسترسی آنلاین</span>
+            </div>
+            <div class="divider"></div>
+            <div class="meta-item">
+                <span class="val">هوش مصنوعی</span>
+                <span class="lbl">دستیار دارویی</span>
+            </div>
+        </div>
+        <div class="scroll-hint">
+            <div class="arrow"></div>مطالعه راهنما</div>
+    </section>
+
+    <!-- AI SECTION -->
+    <div class="section" style="padding-bottom:0">
+
+        <div class="ai-block">
+            <div>
+                <div class="ai-label">✦ دستیار هوشمند دارویی</div>
+                <div class="ai-title">چطور از<br>دستیار <span style="color:var(--accent2)">هوش مصنوعی</span><br>استفاده کنم؟</div>
+                <p class="ai-desc">دستیار دارویی هوشمند در منوی سایدبار در دسترس شماست. کافی‌ست سوال دارویی خود را به زبان فارسی یا انگلیسی تایپ کنید. این دستیار می‌تواند درباره موارد مصرف، عوارض جانبی، تداخل دارویی، دوز مصرف، و مقایسه داروها پاسخ دقیق و تخصصی بدهد. توجه
+                    داشته باشید که پاسخ‌های این دستیار جنبه اطلاع‌رسانی دارند و جایگزین نظر پزشک یا داروساز نمی‌شوند.</p>
+                <div class="tip-box" style="margin-top:20px">
+                    <div class="tip-icon">💡</div>
+                    <div class="tip-text">برای دریافت پاسخ دقیق‌تر، نام دارو را کامل بنویسید. مثلاً به‌جای «آموکسی»، «آموکسی‌سیلین ۵۰۰mg» بنویسید.</div>
+                </div>
+            </div>
+            <div class="chat-mock">
+                <div class="chat-msg user">تداخل متفورمین با ایبوپروفن چیه؟</div>
+                <div class="chat-msg bot">
+                    <div class="model-tag">▸ دستیار هوشمند دارویی</div>
+                    مصرف همزمان متفورمین و ایبوپروفن می‌تواند خطر اسیدوز لاکتیک را افزایش دهد، به‌ویژه در بیماران با نارسایی کلیوی. در صورت نیاز به مسکن، استامینوفن گزینه ایمن‌تری است.
+                </div>
+                <div class="chat-msg user">حداکثر دوز روزانه استامینوفن برای بزرگسالان؟</div>
+                <div class="chat-msg bot">
+                    <div class="model-tag">▸ دستیار هوشمند دارویی</div>
+                    حداکثر دوز روزانه استامینوفن برای بزرگسالان سالم ۴ گرم (۴۰۰۰mg) است. برای بیماران با مشکلات کبدی یا مصرف‌کنندگان الکل، این مقدار به ۲ گرم در روز کاهش می‌یابد.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GETTING STARTED -->
+    <div class="section">
+        <div class="section-label">شروع کار</div>
+        <div class="section-title">از کجا شروع کنم؟</div>
+        <p class="section-desc">اگر برای اولین بار وارد سیستم شده‌اید، این مراحل را به ترتیب دنبال کنید تا سریع‌ترین مسیر برای راه‌اندازی و استفاده روزانه را طی کنید.</p>
+
+        <div class="steps-grid">
+            <div class="step-item">
+                <div class="step-num">۱</div>
+                <div>
+                    <div class="step-title">تکمیل پروفایل و اطلاعات داروخانه</div>
+                    <div class="step-desc">پس از اولین ورود، به بخش «پروفایل» بروید و نام، عکس، و اطلاعات تماس خود را تکمیل کنید. این اطلاعات در تیکت‌های پشتیبانی و اعلانات استفاده می‌شود. همچنین می‌توانید از بین آواتارهای پیش‌فرض یکی را انتخاب کنید یا تصویر شخصی آپلود کنید.</div>
+                    <div class="tip-box">
+                        <div class="tip-icon">✅</div>
+                        <div class="tip-text">برای امنیت بیشتر، بلافاصله پس از اولین ورود رمز عبور پیش‌فرض خود را از بخش «تغییر رمز» تغییر دهید.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">۲</div>
+                <div>
+                    <div class="step-title">ایجاد دسته‌بندی‌های محصول</div>
+                    <div class="step-desc">قبل از افزودن محصول، از منوی «مدیریت محصولات ← دسته‌بندی‌ها» دسته‌های مورد نیاز خود را بسازید. دسته‌بندی‌های پیشنهادی شامل داروهای OTC، آنتی‌بیوتیک‌ها، مکمل‌ها، لوازم پزشکی و بهداشتی می‌شود. ساختار دسته‌بندی درست، جستجو و فیلتر محصولات
+                        را بسیار سریع‌تر می‌کند.</div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">۳</div>
+                <div>
+                    <div class="step-title">افزودن محصولات به سیستم</div>
+                    <div class="step-desc">از منوی «افزودن محصول» وارد شوید. فرم ثبت محصول شامل نام، کد، دسته‌بندی، قیمت اصلی، درصد تخفیف، توضیحات و تصویر است. پس از ثبت، قیمت نهایی به‌صورت خودکار محاسبه می‌شود. برای ویرایش سریع قیمت یا تخفیف چندین محصول همزمان، از قابلیت ویرایش
+                        AJAX در صفحه لیست محصولات استفاده کنید — بدون نیاز به باز کردن هر محصول به‌صورت جداگانه.</div>
+                    <div class="tip-box">
+                        <div class="tip-icon">⚡</div>
+                        <div class="tip-text">در لیست محصولات، روی قیمت یا تخفیف هر ردیف کلیک کنید تا مستقیماً ویرایش شود. این قابلیت بدون reload صفحه کار می‌کند.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">۴</div>
+                <div>
+                    <div class="step-title">بررسی داشبورد و وضعیت کلی</div>
+                    <div class="step-desc">داشبورد اصلی در «پیشخوان» یک نمای کامل از وضعیت سیستم نشان می‌دهد: تعداد محصولات فعال، تیکت‌های باز، اعلانات خوانده‌نشده، و پرسنل آنلاین. هر بار که وارد سیستم می‌شوید، ابتدا داشبورد را بررسی کنید تا از آخرین تغییرات و اعلانات مطلع
+                        باشید.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FEATURES GUIDE -->
+    <div class="section" style="padding-top:0">
+        <div class="section-label">راهنمای بخش‌ها</div>
+        <div class="section-title">هر بخش چه کاری می‌کند؟</div>
+        <p class="section-desc">توضیح کامل تمام بخش‌های سیستم — آنچه هر ماژول انجام می‌دهد و چطور بیشترین استفاده را از آن ببرید.</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(91,140,255,.12)">📦</div>
+                <div class="feature-title">مدیریت محصولات</div>
+                <div class="feature-desc">مرکز اصلی ثبت و ویرایش داروها و کالاهای داروخانه. می‌توانید محصولات را حذف نرم کنید (به سطل آشغال بفرستید) و بعداً بازگردانی کنید. عملیات گروهی مثل حذف یا تغییر وضعیت چندین محصول به‌صورت همزمان هم پشتیبانی می‌شود.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(167,139,250,.12)">💊</div>
+                <div class="feature-title">بانک دارویی</div>
+                <div class="feature-desc">یک پایگاه داده کامل از داروها مجزا از موجودی داروخانه شماست. می‌توانید با فیلترهای ترکیبی (نام، فرم دارویی، نوع تجویز OTC یا Rx) جستجو کنید و نتیجه را به Excel خروجی بگیرید. این بخش برای مراجعه سریع به اطلاعات دارویی در حین کار بسیار کاربردی
+                    است.
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(37,194,110,.12)">🔔</div>
+                <div class="feature-title">اعلانات سیستم</div>
+                <div class="feature-desc">اعلاناتی که از طرف مدیریت سیستم برای شما ارسال می‌شود اینجا نمایش داده می‌شود. اعلانات می‌توانند از نوع فوری، هشدار، موفقیت یا به‌روزرسانی باشند. پس از خواندن هر اعلان، دکمه «خواندم» را بزنید تا از لیست خوانده‌نشده‌ها خارج شود.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(255,176,32,.12)">🔄</div>
+                <div class="feature-title">به‌روزرسانی‌ها</div>
+                <div class="feature-desc">هر بار که نسخه جدیدی از سیستم منتشر می‌شود، تغییرات و قابلیت‌های جدید در این بخش اطلاع‌رسانی می‌شود. قبل از شروع کار هر روز یک نگاه به این بخش بیندازید تا از آخرین تغییرات سیستم باخبر باشید و نیاز به تأیید آپدیت جدید را از دست ندهید.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(255,93,108,.12)">🎫</div>
+                <div class="feature-title">تیکت پشتیبانی</div>
+                <div class="feature-desc">در صورت بروز مشکل یا نیاز به راهنمایی، از «ثبت تیکت جدید» استفاده کنید. موضوع را دقیق بنویسید و در صورت امکان توضیحات کامل بدهید. وضعیت تیکت را از بخش «تیکت‌های من» پیگیری کنید. معمولاً پاسخ‌ها در کمتر از ۲۴ ساعت ارسال می‌شوند.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(91,140,255,.12)">📊</div>
+                <div class="feature-title">خروجی Excel</div>
+                <div class="feature-desc">از هر دو بخش مدیریت محصولات و بانک دارویی می‌توانید خروجی Excel بگیرید. فایل خروجی شامل تمام ستون‌ها با قالب‌بندی حرفه‌ای، تاریخ شمسی صحیح و اطلاعات کامل است. این فایل برای گزارش‌دهی، حسابداری و آرشیو بسیار مفید است.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(37,194,110,.12)">⚙️</div>
+                <div class="feature-title">تنظیمات سیستم</div>
+                <div class="feature-desc">بخش «مرکز تنظیمات» شامل سه زیربخش است: واحد مالی (تنظیم ارز و نحوه نمایش قیمت)، سیستم حسابداری (تنظیمات مالی پیشرفته)، و تنظیمات محصولات (رفتار پیش‌فرض فرم‌های ثبت محصول). این تنظیمات را یک بار در ابتدا انجام دهید.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(167,139,250,.12)">👤</div>
+                <div class="feature-title">پروفایل و امنیت</div>
+                <div class="feature-desc">اطلاعات شخصی، آواتار و رمز عبور خود را از بخش پروفایل مدیریت کنید. برای امنیت حساب، هر ۳۰ روز یک‌بار رمز عبور خود را تغییر دهید و از رمزهای ترکیبی (حرف بزرگ، عدد، نماد) استفاده کنید. آخرین زمان فعالیت شما در پروفایل قابل مشاهده است.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(255,176,32,.12)">🧮</div>
+                <div class="feature-title">ماشین حساب دارویی</div>
+                <div class="feature-desc">ابزار محاسبه سریع برای استفاده روزانه در داروخانه. می‌توانید محاسبات دوز، تبدیل واحد و قیمت‌گذاری را مستقیماً در سیستم انجام دهید بدون نیاز به ابزار خارجی. این ابزار در منوی سایدبار همیشه در دسترس است.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ / TIPS -->
+    <div class="section" style="padding-top:0">
+        <div class="section-label">نکات مهم</div>
+        <div class="section-title">چیزهایی که باید بدانید</div>
+        <p class="section-desc">این نکات از تجربه استفاده روزانه از سیستم جمع‌آوری شده — خواندنشان چند دقیقه وقت می‌گیرد اما ساعت‌ها صرفه‌جویی می‌کند.</p>
+
+        <div class="steps-grid">
+            <div class="step-item">
+                <div class="step-num">🔐</div>
+                <div>
+                    <div class="step-title">امنیت حساب کاربری</div>
+                    <div class="step-desc">هرگز اطلاعات ورود خود را با دیگران به اشتراک نگذارید. هر کاربر باید حساب مجزای خود را داشته باشد. بعد از اتمام کار در هر جلسه، از دکمه «خروج از حساب» در پایین سایدبار استفاده کنید. اگر از سیستم عمومی یا مشترک استفاده می‌کنید، این مرحله
+                        را هرگز فراموش نکنید.</div>
+                    <div class="warn-box">
+                        <div class="tip-icon">⚠️</div>
+                        <div class="warn-text">اگر فکر می‌کنید کسی به حساب شما دسترسی غیرمجاز داشته، فوراً رمز عبور را تغییر دهید و از طریق تیکت به پشتیبانی اطلاع دهید.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">🗑️</div>
+                <div>
+                    <div class="step-title">حذف محصول — نرم در مقابل دائم</div>
+                    <div class="step-desc">وقتی محصولی را حذف می‌کنید، به سطل آشغال منتقل می‌شود و داده‌ها پاک نمی‌شوند. تا ۳۰ روز می‌توانید از «سطل آشغال» آن را بازگردانی کنید. برای حذف کامل و دائمی، باید وارد سطل آشغال شوید و گزینه «حذف دائمی» را انتخاب کنید. این سیستم از
+                        حذف تصادفی جلوگیری می‌کند.</div>
+                    <div class="tip-box">
+                        <div class="tip-icon">💡</div>
+                        <div class="tip-text">قبل از حذف دسته‌بندی، مطمئن شوید محصولی به آن دسته وابسته نیست وگرنه محصولات آن دسته بدون دسته‌بندی می‌مانند.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">📶</div>
+                <div>
+                    <div class="step-title">استفاده آفلاین و مشکلات اتصال</div>
+                    <div class="step-desc">این سیستم کاملاً تحت وب است و نیاز به اتصال اینترنت دارد. اگر در حین کار اتصال قطع شد، صبر کنید تا اتصال برقرار شود — صفحه را refresh نکنید چون ممکن است اطلاعات وارد شده از دست برود. در صورت قطعی طولانی، اطلاعات مهم را به‌صورت موقت
+                        جداگانه یادداشت کنید.</div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">📱</div>
+                <div>
+                    <div class="step-title">استفاده از گوشی موبایل</div>
+                    <div class="step-desc">سیستم روی موبایل هم کار می‌کند. برای دسترسی به سایدبار در موبایل، از آیکون منو در گوشه بالا-راست صفحه استفاده کنید. توجه داشته باشید که برخی جداول با ستون‌های زیاد روی موبایل نیاز به اسکرول افقی دارند — این رفتار طبیعی است.</div>
+                    <div class="tip-box">
+                        <div class="tip-icon">📌</div>
+                        <div class="tip-text">برای دسترسی سریع‌تر، آدرس سیستم را در مرورگر موبایل خود «ذخیره در صفحه اصلی» کنید تا مثل یک اپ باز شود.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div style="margin-bottom:6px;color:var(--text);font-weight:600">سیستم هوشمند مدیریت داروخانه</div>
+        توسعه و کد نویسی شده توسط امیر محمد محمدی 09199111230
+    </footer>
+
+</body>
+
+</html>

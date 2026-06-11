@@ -1,0 +1,313 @@
+{% extends "pharmacy/base.html" %} {% load static %} {% block title %}ویرایش محصول{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>ویرایش محصول</h4>
+        <span class="sub">{{ product.name }}</span>
+    </div>
+    <div class="topbar-actions">
+        <a href="{% url 'product_list' %}" class="btn btn-secondary">↩ بازگشت به لیست</a>
+    </div>
+</div>
+
+{% if messages %} {% for message in messages %}
+<div class="alert alert-{{ message.tags }}">{{ message }}</div>
+{% endfor %} {% endif %}
+
+<form method="POST" enctype="multipart/form-data" id="edit-form">
+    {% csrf_token %}
+
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start">
+
+        <!-- ستون چپ -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+            <div class="glass-card" style="padding:24px">
+                <h3 style="color:#fff;margin:0 0 20px;font-size:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06)">
+                    📋 اطلاعات پایه
+                </h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div>
+                        <label class="form-label">کد محصول *</label>
+                        <input type="text" name="code" class="form-control" value="{{ product.code }}" required>
+                    </div>
+                    <div>
+                        <label class="form-label">نام محصول *</label>
+                        <input type="text" name="name" class="form-control" value="{{ product.name }}" required>
+                    </div>
+                    <div style="grid-column:1/-1">
+                        <label class="form-label">توضیحات</label>
+                        <textarea name="description" class="form-control" style="min-height:120px;resize:vertical">{{ product.description|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card" style="padding:24px">
+                <h3 style="color:#fff;margin:0 0 20px;font-size:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06)">
+                    💰 قیمت‌گذاری
+                </h3>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div>
+                        <label class="form-label">قیمت اصلی (تومان) *</label>
+                        <input type="number" name="price" id="edit-price" class="form-control" value="{{ product.price }}" min="0" required oninput="calcPrice()">
+                    </div>
+                    <div>
+                        <label class="form-label">قیمت نهایی (خودکار)</label>
+                        <input type="text" id="edit-final" class="form-control" readonly style="background:rgba(37,194,110,.08);color:#25c26e;font-weight:700">
+                    </div>
+                </div>
+
+                <div style="margin-top:20px;padding:16px;background:rgba(255,176,32,.05);border:1px solid rgba(255,176,32,.15);border-radius:14px">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+                        <span style="font-size:14px;font-weight:700;color:#ffb020">🏷 تخفیف</span>
+                        <span style="font-size:12px;color:#9fb0d0">— درصدی یا مبلغی</span>
+                    </div>
+
+                    <div style="display:flex;gap:10px;margin-bottom:14px">
+                        <button type="button" id="disc-tab-pct" onclick="switchDiscTab('percent')" style="flex:1;padding:9px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;background:rgba(255,176,32,.2);color:#ffb020;transition:.2s">
+                        درصدی (%)
+                    </button>
+                        <button type="button" id="disc-tab-amt" onclick="switchDiscTab('amount')" style="flex:1;padding:9px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;background:rgba(255,255,255,.05);color:#9fb0d0;transition:.2s">
+                        مبلغی (تومان)
+                    </button>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                        <div id="disc-pct-wrap">
+                            <label class="form-label">درصد تخفیف</label>
+                            <input type="number" id="disc-pct-input" class="form-control" value="{{ product.discount_percent }}" min="0" max="100" oninput="calcFromPercent()">
+                        </div>
+                        <div id="disc-amt-wrap" style="display:none">
+                            <label class="form-label">مبلغ تخفیف (تومان)</label>
+                            <input type="number" id="disc-amt-input" class="form-control" min="0" oninput="calcFromAmount()">
+                        </div>
+                        <div>
+                            <label class="form-label">نتیجه محاسبه</label>
+                            <input type="text" id="disc-result" class="form-control" readonly style="background:rgba(255,176,32,.08);color:#ffb020">
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="discount_percent" id="discount-hidden" value="{{ product.discount_percent }}">
+
+                    <div style="margin-top:10px;padding:10px;background:rgba(255,255,255,.03);border-radius:10px;font-size:12px;color:#9fb0d0;line-height:1.7">
+                        ⚠ <strong style="color:#ffb020">نکته:</strong> تخفیف نمی‌تواند بیشتر از قیمت اصلی باشد.
+                    </div>
+                </div>
+
+                <div id="price-error" style="display:none;margin-top:12px" class="alert alert-danger"></div>
+            </div>
+
+            <div class="glass-card" style="padding:24px">
+                <h3 style="color:#fff;margin:0 0 20px;font-size:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06)">
+                    🗂 دسته‌بندی و وضعیت
+                </h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div>
+                        <label class="form-label">دسته‌بندی</label>
+                        <select name="category" class="form-select">
+                        <option value="">— انتخاب دسته‌بندی —</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if product.category_id == cat.id %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    </div>
+                    <div>
+                        <label class="form-label">وضعیت محصول</label>
+                        <select name="is_active" class="form-select">
+                        <option value="on" {% if product.is_active %}selected{% endif %}>✅ فعال (موجود)</option>
+                        <option value="" {% if not product.is_active %}selected{% endif %}>❌ غیرفعال (ناموجود)</option>
+                    </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- تاریخ‌ها — فقط نمایش -->
+            <div class="glass-card" style="padding:24px">
+                <h3 style="color:#fff;margin:0 0 16px;font-size:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06)">
+                    📅 تاریخ‌ها
+                </h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div style="padding:12px;background:rgba(255,255,255,.03);border-radius:10px">
+                        <div style="font-size:11px;color:#9fb0d0;margin-bottom:4px">تاریخ بارگذاری</div>
+                        <div style="font-size:14px;color:#fff;font-weight:600">{{ product.created_at|date:"Y/m/d H:i" }}</div>
+                    </div>
+                    <div style="padding:12px;background:rgba(255,255,255,.03);border-radius:10px">
+                        <div style="font-size:11px;color:#9fb0d0;margin-bottom:4px">آخرین ویرایش</div>
+                        <div style="font-size:14px;color:#fff;font-weight:600">{{ product.updated_at|date:"Y/m/d H:i" }}</div>
+                    </div>
+                </div>
+                <div style="margin-top:10px;font-size:12px;color:#6f7f9f">
+                    🔒 تاریخ‌ها توسط سیستم ثبت می‌شوند و قابل ویرایش نیستند.
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ستون راست -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+            <div class="glass-card" style="padding:24px">
+                <h3 style="color:#fff;margin:0 0 20px;font-size:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06)">
+                    🖼 تصویر محصول
+                </h3>
+                {% if product.image %}
+                <div style="margin-bottom:12px">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px">
+                    <div style="font-size:12px;color:#9fb0d0;margin-top:6px;text-align:center">تصویر فعلی</div>
+                </div>
+                {% endif %}
+                <div id="img-drop-area" style="border:2px dashed rgba(91,140,255,.3);border-radius:14px;padding:24px;text-align:center;cursor:pointer;transition:.2s" onclick="document.getElementById('img-input').click()" ondragover="event.preventDefault();this.style.borderColor='#5b8cff'"
+                    ondragleave="this.style.borderColor='rgba(91,140,255,.3)'" ondrop="handleDrop(event)">
+                    <div id="img-placeholder">
+                        <div style="font-size:32px;margin-bottom:8px">📤</div>
+                        <div style="font-size:13px;color:#9fb0d0">{% if product.image %}تغییر تصویر{% else %}بارگذاری تصویر{% endif %}</div>
+                    </div>
+                    <img id="img-preview" src="" alt="" style="display:none;width:100%;max-height:180px;object-fit:cover;border-radius:10px">
+                </div>
+                <input type="file" name="image" id="img-input" accept="image/*" style="display:none" onchange="previewImg(this)">
+            </div>
+
+            <div class="glass-card" style="padding:24px">
+                <h3 style="color:#fff;margin:0 0 16px;font-size:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06)">
+                    📊 خلاصه قیمت
+                </h3>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,.03);border-radius:10px">
+                        <span style="color:#9fb0d0;font-size:13px">قیمت اصلی</span>
+                        <span id="sum-price" style="color:#fff;font-weight:700">{{ product.price|floatformat:0 }} تومان</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,176,32,.05);border-radius:10px">
+                        <span style="color:#9fb0d0;font-size:13px">تخفیف</span>
+                        <span id="sum-discount" style="color:#ffb020;font-weight:700">
+                        {% if product.discount_percent > 0 %}{{ product.discount_percent }}٪{% else %}—{% endif %}
+                    </span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:12px;background:rgba(37,194,110,.08);border-radius:10px;border:1px solid rgba(37,194,110,.2)">
+                        <span style="color:#25c26e;font-size:14px;font-weight:700">قیمت نهایی</span>
+                        <span id="sum-final" style="color:#25c26e;font-size:16px;font-weight:800">{{ product.final_price }} تومان</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card" style="padding:20px">
+                <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;margin-bottom:10px">
+                💾 ذخیره تغییرات
+            </button>
+                <a href="{% url 'product_list' %}" class="btn btn-secondary" style="width:100%;padding:12px;font-size:13px;text-align:center;justify-content:center">
+                انصراف
+            </a>
+            </div>
+
+        </div>
+    </div>
+
+</form>
+
+{% endblock %} {% block extra_js %}
+<script>
+    let discMode = 'percent';
+
+    // مقداردهی اولیه
+    window.addEventListener('load', () => {
+        calcPrice();
+        const pct = parseFloat('{{ product.discount_percent }}') || 0;
+        if (pct > 0) {
+            document.getElementById('disc-result').value = pct.toFixed(1) + '٪ تخفیف';
+        }
+    });
+
+    function switchDiscTab(mode) {
+        discMode = mode;
+        const pctWrap = document.getElementById('disc-pct-wrap');
+        const amtWrap = document.getElementById('disc-amt-wrap');
+        const tabPct = document.getElementById('disc-tab-pct');
+        const tabAmt = document.getElementById('disc-tab-amt');
+        if (mode === 'percent') {
+            pctWrap.style.display = 'block';
+            amtWrap.style.display = 'none';
+            tabPct.style.background = 'rgba(255,176,32,.2)';
+            tabPct.style.color = '#ffb020';
+            tabAmt.style.background = 'rgba(255,255,255,.05)';
+            tabAmt.style.color = '#9fb0d0';
+        } else {
+            pctWrap.style.display = 'none';
+            amtWrap.style.display = 'block';
+            tabAmt.style.background = 'rgba(255,176,32,.2)';
+            tabAmt.style.color = '#ffb020';
+            tabPct.style.background = 'rgba(255,255,255,.05)';
+            tabPct.style.color = '#9fb0d0';
+        }
+        calcPrice();
+    }
+
+    function calcFromPercent() {
+        const p = parseFloat(document.getElementById('edit-price').value) || 0;
+        const pct = parseFloat(document.getElementById('disc-pct-input').value) || 0;
+        const err = document.getElementById('price-error');
+        if (pct > 100) {
+            err.textContent = 'تخفیف نمی‌تواند بیشتر از ۱۰۰٪ باشد.';
+            err.style.display = 'block';
+            return;
+        }
+        err.style.display = 'none';
+        const amt = Math.round(p * pct / 100);
+        document.getElementById('disc-result').value = amt > 0 ? amt.toLocaleString() + ' تومان تخفیف' : '—';
+        document.getElementById('discount-hidden').value = pct;
+        calcPrice();
+    }
+
+    function calcFromAmount() {
+        const p = parseFloat(document.getElementById('edit-price').value) || 0;
+        const amt = parseFloat(document.getElementById('disc-amt-input').value) || 0;
+        const err = document.getElementById('price-error');
+        if (amt > p && p > 0) {
+            err.textContent = 'مبلغ تخفیف نمی‌تواند بیشتر از قیمت اصلی باشد.';
+            err.style.display = 'block';
+            return;
+        }
+        err.style.display = 'none';
+        const pct = p > 0 ? (amt / p * 100) : 0;
+        document.getElementById('disc-result').value = pct > 0 ? pct.toFixed(1) + '٪ تخفیف' : '—';
+        document.getElementById('discount-hidden').value = pct.toFixed(2);
+        calcPrice();
+    }
+
+    function calcPrice() {
+        const p = parseFloat(document.getElementById('edit-price').value) || 0;
+        const pct = parseFloat(document.getElementById('discount-hidden').value) || 0;
+        const final = Math.round(p - p * pct / 100);
+        const amt = Math.round(p * pct / 100);
+        document.getElementById('edit-final').value = p > 0 ? final.toLocaleString() + ' تومان' : '';
+        document.getElementById('sum-price').textContent = p > 0 ? p.toLocaleString() + ' تومان' : '—';
+        document.getElementById('sum-discount').textContent = amt > 0 ? '- ' + amt.toLocaleString() + ' تومان (' + pct.toFixed(1) + '٪)' : '—';
+        document.getElementById('sum-final').textContent = p > 0 ? final.toLocaleString() + ' تومان' : '—';
+    }
+
+    function previewImg(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('img-preview').src = e.target.result;
+                document.getElementById('img-preview').style.display = 'block';
+                document.getElementById('img-placeholder').style.display = 'none';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            document.getElementById('img-input').files = dt.files;
+            previewImg(document.getElementById('img-input'));
+        }
+        document.getElementById('img-drop-area').style.borderColor = 'rgba(91,140,255,.3)';
+    }
+</script>
+{% endblock %}

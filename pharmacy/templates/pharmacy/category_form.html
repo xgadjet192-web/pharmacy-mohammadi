@@ -1,0 +1,32 @@
+{% extends "pharmacy/base.html" %} {% block title %}{% if action == 'add' %}افزودن دسته‌بندی{% else %}ویرایش دسته‌بندی{% endif %}{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>{% if action == 'add' %}افزودن دسته‌بندی{% else %}ویرایش دسته‌بندی{% endif %}</h4>
+    </div>
+    <div class="topbar-actions">
+        <a href="{% url 'category_list' %}" class="btn btn-secondary">↩ بازگشت</a>
+    </div>
+</div>
+
+{% if messages %}{% for m in messages %}
+<div class="alert alert-{{ m.tags }}" style="margin-bottom:16px">{{ m }}</div>{% endfor %}{% endif %}
+
+<div class="glass-card" style="padding:28px;max-width:480px;margin:0 auto">
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display:flex;flex-direction:column;gap:16px">
+            <div>
+                <label class="form-label">نام دسته‌بندی *</label>
+                <input type="text" name="name" class="form-control" value="{% if action == 'edit' %}{{ category.name }}{% endif %}" placeholder="مثال: داروهای گیاهی" required>
+            </div>
+            <div style="display:flex;gap:12px;justify-content:flex-end">
+                <a href="{% url 'category_list' %}" class="btn btn-secondary">انصراف</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if action == 'add' %}➕ افزودن{% else %}💾 ذخیره{% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

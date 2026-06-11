@@ -1,0 +1,44 @@
+{% extends "pharmacy/base.html" %} {% block title %}تیکت جدید{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>ثبت تیکت جدید</h4>
+        <span class="sub">ارسال درخواست به پشتیبانی</span>
+    </div>
+    <div class="topbar-actions">
+        <a href="{% url 'ticket_list' %}" class="btn btn-secondary">↩ بازگشت</a>
+    </div>
+</div>
+
+<div class="glass-card" style="padding:32px;max-width:700px;margin:0 auto">
+    {% if messages %}{% for m in messages %}
+    <div class="alert alert-{{ m.tags }}">{{ m }}</div>{% endfor %}{% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display:flex;flex-direction:column;gap:20px">
+            <div>
+                <label class="form-label">عنوان تیکت *</label>
+                <input type="text" name="title" class="form-control" placeholder="عنوان مشکل یا درخواست خود را بنویسید" required>
+            </div>
+            <div>
+                <label class="form-label">اولویت</label>
+                <select name="priority" class="form-select">
+                    <option value="low">کم</option>
+                    <option value="medium" selected>متوسط</option>
+                    <option value="high">زیاد</option>
+                    <option value="urgent">فوری</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">متن پیام *</label>
+                <textarea name="message" class="form-control" style="min-height:160px;resize:vertical" placeholder="توضیحات کامل مشکل یا درخواست خود را بنویسید..." required></textarea>
+            </div>
+            <div style="display:flex;gap:12px;justify-content:flex-end">
+                <a href="{% url 'ticket_list' %}" class="btn btn-secondary">انصراف</a>
+                <button type="submit" class="btn btn-primary">📤 ارسال تیکت</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

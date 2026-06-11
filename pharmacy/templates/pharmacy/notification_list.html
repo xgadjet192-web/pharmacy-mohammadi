@@ -1,0 +1,60 @@
+{% extends "pharmacy/base.html" %} {% block title %}اعلانات{% endblock %} {% block content %}
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>اعلانات</h4>
+        <span class="sub">اطلاعیه‌ها و پیام‌های سازمان</span>
+    </div>
+</div>
+
+<div class="glass-card" style="padding:20px">
+    {% if notifications %}
+    <div style="display:flex;flex-direction:column;gap:12px">
+        {% for item in notifications %} {% with n=item.obj %}
+        <div id="notif-{{ n.pk }}" style="background:{% if not item.is_read %}rgba(91,140,255,.08){% else %}rgba(255,255,255,.03){% endif %};border:1px solid {% if not item.is_read %}rgba(91,140,255,.2){% else %}rgba(255,255,255,.06){% endif %};border-radius:14px;padding:16px;transition:.2s">
+            <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
+                <div style="flex:1">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                        {% if n.notif_type == 'urgent' %}
+                        <span style="background:rgba(255,93,108,.15);color:#ff5d6c;padding:2px 10px;border-radius:999px;font-size:11px">فوری</span> {% elif n.notif_type == 'warning' %}
+                        <span style="background:rgba(255,176,32,.15);color:#ffb020;padding:2px 10px;border-radius:999px;font-size:11px">هشدار</span> {% elif n.notif_type == 'success' %}
+                        <span style="background:rgba(37,194,110,.15);color:#25c26e;padding:2px 10px;border-radius:999px;font-size:11px">موفقیت</span> {% elif n.notif_type == 'update' %}
+                        <span style="background:rgba(91,140,255,.15);color:#5b8cff;padding:2px 10px;border-radius:999px;font-size:11px">به‌روزرسانی</span> {% else %}
+                        <span style="background:rgba(255,255,255,.08);color:#9fb0d0;padding:2px 10px;border-radius:999px;font-size:11px">اطلاع‌رسانی</span> {% endif %} {% if not item.is_read %}
+                        <span style="width:8px;height:8px;background:#5b8cff;border-radius:50%;display:inline-block"></span> {% endif %}
+                    </div>
+                    <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:6px">{{ n.title }}</div>
+                    <div style="font-size:13px;color:#9fb0d0;line-height:1.7">{{ n.message }}</div>
+                    <div style="font-size:11px;color:#64748b;margin-top:8px">{{ item.created_fa }}</div>
+                </div>
+                {% if not item.is_read %}
+                <button onclick="markRead({{ n.pk }})" style="background:rgba(91,140,255,.15);border:none;color:#5b8cff;padding:6px 14px;border-radius:10px;cursor:pointer;font-size:12px;font-family:inherit">خواندم</button> {% endif %}
+            </div>
+        </div>
+        {% endwith %} {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:60px;color:#9fb0d0">
+        <div style="font-size:48px;margin-bottom:16px">🔔</div>
+        <div style="font-size:18px;font-weight:700">اعلانی وجود ندارد</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+    function markRead(pk) {
+        fetch(`/pharmacy/notifications/${pk}/read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        }).then(r => r.json()).then(d => {
+            if (d.success) {
+                const el = document.getElementById(`notif-${pk}`);
+                el.style.background = 'rgba(255,255,255,.03)';
+                el.style.borderColor = 'rgba(255,255,255,.06)';
+                el.querySelector('button') ? .remove();
+            }
+        });
+    }
+</script>
+{% endblock %}

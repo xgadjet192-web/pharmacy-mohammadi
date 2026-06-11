@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fa">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}پنل داروخانه{% endblock %}</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600&display=swap');
+        body {
+            margin: 0;
+            font-family: "Vazirmatn", sans-serif;
+            background: linear-gradient(135deg, #E8F5F2, #DFF0EA);
+            color: #2E4A48;
+            direction: rtl;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(84, 201, 178, 0.25);
+            padding: 20px 15px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #54C9B2;
+            border-radius: 6px;
+        }
+        
+        .user-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-section h3 {
+            color: #008F77;
+            margin-bottom: 4px;
+            font-size: 18px;
+        }
+        
+        .user-section span {
+            font-size: 13px;
+            color: #607D7C;
+        }
+        
+        .menu-box {
+            background: rgba(255, 255, 255, 0.55);
+            border-radius: 12px;
+            padding: 12px 10px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.04);
+        }
+        
+        .menu-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #008F77;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .menu-item-root {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 9px;
+            padding: 9px 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2E4A48;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.25s;
+        }
+        
+        .menu-item-root:hover {
+            background: #54C9B2;
+            color: #fff;
+        }
+        
+        .submenu {
+            margin-top: 6px;
+            padding-top: 4px;
+            border-top: 1px dashed rgba(0, 0, 0, 0.06);
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+        
+        .submenu a {
+            display: block;
+            text-decoration: none;
+            padding: 7px 8px;
+            font-size: 13px;
+            color: #607D7C;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        
+        .submenu a:hover {
+            background: rgba(0, 143, 119, 0.08);
+            color: #008F77;
+            transform: translateX(-3px);
+        }
+        
+        .menu-box:hover .submenu {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .content {
+            margin-right: 320px;
+            padding: 20px;
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+    <div class="sidebar">
+
+        <div class="user-section">
+            <h3>سلام {{ request.user.first_name|default:request.user.username }} 👋</h3>
+            <span>اکانت کاربری فعال</span>
+        </div>
+
+        <!-- (تمام منوهای تو بدون تغییر اینجاست) -->
+
+        <!-- محصولات -->
+        <div class="menu-box">
+            <div class="menu-title">
+                <span>محصولات</span>
+                <span class="icon">📦</span>
+            </div>
+            <div class="menu-item-root">
+                <span>مدیریت محصولات</span>
+                <span class="arrow">▾</span>
+            </div>
+            <div class="submenu">
+                <a href="/products/">همه محصولات</a>
+                <a href="/products/add/">افزودن محصول جدید</a>
+                <a href="#">دسته‌بندی‌ها</a>
+                <a href="#">محصولات حذف‌شده</a>
+            </div>
+        </div>
+
+        <!-- بقیه منوها بدون تغییر… -->
+
+        <div class="menu-box">
+            <div class="menu-title">
+                <span>ماشین حساب</span>
+                <span class="icon">🧮</span>
+            </div>
+            <div class="menu-item-root" onclick="openCalc()">
+                <span>باز کردن ماشین حساب</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        function openCalc() {
+            alert("ماشین حساب در نسخه بعدی اضافه می‌شود.");
+        }
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+
+</body>
+
+</html>

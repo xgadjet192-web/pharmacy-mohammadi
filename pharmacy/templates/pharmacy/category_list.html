@@ -1,0 +1,148 @@
+{% extends "pharmacy/base.html" %} {% block title %}دسته‌بندی‌ها{% endblock %} {% block content %}
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>دسته‌بندی محصولات</h4>
+        <span class="sub">مدیریت، افزودن و حذف دسته‌بندی‌های محصولات</span>
+    </div>
+    <div class="topbar-actions">
+        <a href="{% url 'category_add' %}" class="btn btn-primary">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> افزودن دسته‌بندی
+        </a>
+    </div>
+</div>
+
+{% if messages %}{% for m in messages %}
+<div class="alert alert-{{ m.tags }}" style="margin-bottom:16px">{{ m }}</div>
+{% endfor %}{% endif %}
+
+<!-- KPI -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px">
+    <div class="glass-card" style="padding:20px;text-align:center">
+        <div style="font-size:28px;font-weight:800;color:#fff">{{ categories|length }}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">کل دسته‌بندی‌ها</div>
+    </div>
+    <div class="glass-card" style="padding:20px;text-align:center">
+        <div style="font-size:28px;font-weight:800;color:#25c26e">
+            {% with total=0 %}{{ categories|length }}{% endwith %}
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">دسته‌بندی فعال</div>
+    </div>
+</div>
+
+<!-- جدول -->
+<div class="glass-card" style="padding:0;overflow:hidden">
+    {% if categories %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:50px">#</th>
+                    <th>نام دسته‌بندی</th>
+                    <th>تعداد محصولات</th>
+                    <th>اقدامات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr>
+                    <td style="color:var(--muted);font-size:12px">{{ forloop.counter }}</td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <div style="width:36px;height:36px;border-radius:10px;background:rgba(124,92,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                <svg width="16" height="16" fill="none" stroke="#c4b5fd" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                            </div>
+                            <span style="font-weight:700;color:#fff">{{ cat.name }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="background:rgba(91,140,255,.15);color:#7dd3fc;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">
+                            {{ cat.products.count }} محصول
+                        </span>
+                    </td>
+                    <td>
+                        <div class="row-actions">
+                            <a href="{% url 'category_edit' cat.pk %}" class="mini-btn" style="background:rgba(91,140,255,.2);color:#5b8cff;text-decoration:none">
+                                ویرایش
+                            </a>
+                            <button class="mini-btn" style="background:rgba(255,93,108,.15);color:#ff5d6c" onclick="deleteCategory({{ cat.pk }}, '{{ cat.name|escapejs }}')">
+                                حذف
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="padding:80px;text-align:center;color:var(--muted)">
+        <div style="font-size:56px;margin-bottom:16px;opacity:.4">📁</div>
+        <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px">هیچ دسته‌بندی‌ای وجود ندارد</div>
+        <div style="font-size:13px;margin-bottom:20px">اولین دسته‌بندی را بسازید</div>
+        <a href="{% url 'category_add' %}" class="btn btn-primary" style="display:inline-flex">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> افزودن دسته‌بندی
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal تایید حذف -->
+<div id="deleteModal" style="display:none;position:fixed;inset:0;z-index:999;align-items:center;justify-content:center">
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)" onclick="closeDeleteModal()"></div>
+    <div style="position:relative;background:#0d1527;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;max-width:400px;width:90%;z-index:1;animation:pfi .2s ease">
+        <div style="text-align:center;margin-bottom:20px">
+            <div style="font-size:48px;margin-bottom:12px">🗑️</div>
+            <h3 style="color:#fff;margin-bottom:8px">حذف دسته‌بندی</h3>
+            <p style="color:var(--muted);font-size:13px">آیا مطمئنید که دسته‌بندی <strong id="deleteCatName" style="color:#ff5d6c"></strong> را حذف کنید؟</p>
+        </div>
+        <div style="display:flex;gap:10px">
+            <button class="btn btn-danger" style="flex:1" onclick="confirmDelete()">بله، حذف شود</button>
+            <button class="btn btn-secondary" style="flex:1" onclick="closeDeleteModal()">انصراف</button>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+    let deletePk = null;
+
+    function deleteCategory(pk, name) {
+        deletePk = pk;
+        document.getElementById('deleteCatName').textContent = name;
+        const modal = document.getElementById('deleteModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+        deletePk = null;
+    }
+
+    function getCookie(n) {
+        const v = document.cookie.match('(^|;) ?' + n + '=([^;]*)(;|$)');
+        return v ? v[2] : null;
+    }
+
+    async function confirmDelete() {
+        if (!deletePk) return;
+        try {
+            const r = await fetch(`/pharmacy/categories/${deletePk}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            const d = await r.json();
+            if (d.success) {
+                closeDeleteModal();
+                toast(d.message, 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                closeDeleteModal();
+                toast(d.error, 'danger');
+            }
+        } catch (e) {
+            toast('خطا در ارتباط با سرور', 'danger');
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,1281 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}پنل داروخانه{% endblock %} — سازمان دارو شیراز</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+        
+         :root {
+            --v: #6c47ff;
+            --v2: #8b6fff;
+            --b: #3b82f6;
+            --c: #06b6d4;
+            --g: #10b981;
+            --r: #f43f5e;
+            --gold: #f59e0b;
+            --bg: #010006;
+            --accent: #7c5cff;
+            --accent2: #5b8cff;
+            --success: #10b981;
+            --danger: #f43f5e;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --bg2: rgba(14, 7, 42, .88);
+            --border: rgba(108, 71, 255, .2);
+            --text: #e0e0e0;
+            --muted: #9fb0d0;
+            --sidebar-w: 300px;
+        }
+        
+        html {
+            height: 100%
+        }
+        
+        body {
+            font-family: "Vazir", sans-serif;
+            background: radial-gradient(ellipse 120% 80% at 0% 0%, rgba(108, 71, 255, .28) 0%, transparent 45%), radial-gradient(ellipse 90% 75% at 100% 100%, rgba(59, 130, 246, .2) 0%, transparent 45%), var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        /* ══ SIDEBAR ══════════════════════════════════════════════════════ */
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: rgba(8, 4, 22, .96);
+            /* backdrop-filter فقط یک‌بار روی کل سایدبار، نه لایه‌های داخلی */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 200;
+            /* will-change برای GPU acceleration */
+            will-change: transform;
+            /* isolation برای جلوگیری از reflow روی فرزندان */
+            isolation: isolate;
+        }
+        /* ══ SIDEBAR SCROLL ═══════════════════════════════════════════════ */
+        
+        .sidebar-scroll {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 14px 12px 10px;
+            /* scroll روی GPU */
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            /* scrollbar */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(108, 71, 255, .3) transparent;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: rgba(108, 71, 255, .3);
+            border-radius: 99px;
+        }
+        /* user card */
+        
+        .user-card {
+            background: rgba(108, 71, 255, .07);
+            border: 1px solid rgba(108, 71, 255, .15);
+            border-radius: 16px;
+            padding: 16px 12px;
+            margin-bottom: 14px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .user-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(108, 71, 255, .12), transparent);
+            pointer-events: none;
+        }
+        
+        .avatar-ring {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            padding: 2px;
+            background: conic-gradient(from 0deg, #6c47ff, #3b82f6, #06b6d4, #6c47ff);
+            box-shadow: 0 0 20px rgba(108, 71, 255, .35);
+            cursor: pointer;
+            /* فقط transform انیمیت بشه، نه همه چیز */
+            transition: transform 120ms ease-out;
+            will-change: transform;
+        }
+        
+        .avatar-ring:hover {
+            transform: scale(1.06);
+        }
+        
+        .avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #0d0820;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .avatar-inner svg {
+            width: 32px;
+            height: 32px;
+            fill: none;
+            stroke: #b39ddb;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        .avatar-ring img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+        
+        .user-pharmacy {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .35);
+            margin-bottom: 6px;
+        }
+        
+        .online-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            color: var(--g);
+            margin-bottom: 8px;
+        }
+        
+        .online-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--g);
+            box-shadow: 0 0 5px var(--g);
+            animation: pulse 2s infinite;
+            will-change: opacity;
+        }
+        
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1
+            }
+            50% {
+                opacity: .25
+            }
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .ua-btn {
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            transition: transform 120ms ease-out;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            will-change: transform;
+        }
+        
+        .ua-btn svg {
+            width: 10px;
+            height: 10px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+        
+        .ua-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .ua-edit {
+            background: rgba(59, 130, 246, .14);
+            color: #5b8cff;
+            border: 1px solid rgba(59, 130, 246, .22);
+        }
+        
+        .ua-avatar {
+            background: rgba(108, 71, 255, .14);
+            color: #b39ddb;
+            border: 1px solid rgba(108, 71, 255, .22);
+        }
+        
+        .ua-pass {
+            background: rgba(245, 158, 11, .12);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, .22);
+        }
+        /* menu sections */
+        
+        .menu-box {
+            background: rgba(255, 255, 255, .025);
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255, 255, 255, .05);
+        }
+        
+        .menu-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: rgba(108, 71, 255, .7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 4px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .menu-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(108, 71, 255, .18);
+        }
+        
+        .menu-root {
+            border-radius: 9px;
+            padding: 9px 10px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .75);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            /* فقط background و color — بدون transition روی همه چیز */
+            transition: background 120ms ease-out, color 120ms ease-out;
+            user-select: none;
+            background: rgba(255, 255, 255, .04);
+        }
+        
+        .menu-root:hover {
+            background: linear-gradient(135deg, rgba(108, 71, 255, .28), rgba(59, 130, 246, .18));
+            color: #fff;
+        }
+        
+        .menu-root .mi {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .menu-root .arrow {
+            font-size: 10px;
+            color: rgba(255, 255, 255, .3);
+            flex-shrink: 0;
+            /* انیمیشن روان arrow با GPU */
+            transition: transform 200ms cubic-bezier(.4, 0, .2, 1);
+            will-change: transform;
+            display: inline-block;
+        }
+        
+        .menu-root.open .arrow {
+            transform: rotate(180deg);
+        }
+        
+        .micon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .micon svg {
+            width: 15px;
+            height: 15px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        /* submenu با انیمیشن GPU-accelerated */
+        
+        .submenu {
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1px dashed rgba(255, 255, 255, .05);
+            /* از display:none به visibility+opacity+height تغییر دادیم */
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: max-height 220ms cubic-bezier(.4, 0, .2, 1), opacity 180ms ease-out, visibility 0ms linear 220ms;
+        }
+        
+        .submenu.open {
+            max-height: 500px;
+            opacity: 1;
+            visibility: visible;
+            transition: max-height 250ms cubic-bezier(.4, 0, .2, 1), opacity 200ms ease-out, visibility 0ms linear 0ms;
+        }
+        
+        .submenu a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            padding: 7px 8px;
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, .55);
+            border-radius: 7px;
+            transition: background 100ms ease-out, color 100ms ease-out;
+        }
+        
+        .submenu a:hover {
+            background: rgba(108, 71, 255, .15);
+            color: #fff;
+        }
+        
+        .submenu a.active-link {
+            background: rgba(108, 71, 255, .22);
+            color: #fff;
+            font-weight: 700;
+        }
+        
+        .sicon {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .sicon svg {
+            width: 13px;
+            height: 13px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        .nbadge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            margin-right: auto;
+        }
+        
+        .menu-direct {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            background: rgba(255, 255, 255, .04);
+            border-radius: 9px;
+            padding: 9px 10px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, .75);
+            transition: background 120ms ease-out, color 120ms ease-out, border-color 120ms ease-out;
+            margin-bottom: 8px;
+            border: 1px solid transparent;
+        }
+        
+        .menu-direct:hover,
+        .menu-direct.active-link {
+            background: linear-gradient(135deg, rgba(108, 71, 255, .3), rgba(59, 130, 246, .2));
+            color: #fff;
+            border-color: rgba(108, 71, 255, .2);
+        }
+        /* footer */
+        
+        .sidebar-footer {
+            padding: 10px 12px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-footer a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--danger);
+            text-decoration: none;
+            font-size: 12.5px;
+            font-weight: 600;
+            padding: 9px 12px;
+            border-radius: 10px;
+            transition: background 120ms ease-out;
+        }
+        
+        .sidebar-footer a svg {
+            width: 15px;
+            height: 15px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        .sidebar-footer a:hover {
+            background: rgba(244, 63, 94, .1);
+        }
+        /* ══ CONTENT ══════════════════════════════════════════════════════ */
+        
+        .content {
+            margin-right: var(--sidebar-w);
+            padding: 28px;
+            min-height: 100vh;
+        }
+        /* ══ GLASS CARD ═══════════════════════════════════════════════════ */
+        
+        .glass-card {
+            background: rgba(14, 7, 42, .75);
+            border: 1px solid rgba(108, 71, 255, .12);
+            border-radius: 20px;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(255, 255, 255, .03) inset;
+        }
+        /* ══ TOPBAR ═══════════════════════════════════════════════════════ */
+        
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .topbar-title h4 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+        
+        .topbar-title .sub {
+            font-size: 11px;
+            color: var(--muted);
+        }
+        
+        .topbar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        /* ══ BUTTONS ══════════════════════════════════════════════════════ */
+        
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 9px 16px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 12.5px;
+            transition: transform 120ms ease-out, filter 120ms ease-out;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            will-change: transform;
+        }
+        
+        .btn svg {
+            width: 13px;
+            height: 13px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(130deg, #6c47ff, #3b82f6);
+            color: #fff;
+            box-shadow: 0 4px 18px rgba(108, 71, 255, .28);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            color: #fff;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #06b6d4, #0284c7);
+            color: #fff;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, .07);
+            color: rgba(255, 255, 255, .8);
+            border: 1px solid rgba(255, 255, 255, .08);
+        }
+        /* ══ TABLE ════════════════════════════════════════════════════════ */
+        
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 14px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+        
+        thead th {
+            background: rgba(8, 4, 22, .9);
+            color: rgba(180, 160, 255, .8);
+            font-size: 12px;
+            padding: 13px 12px;
+            text-align: right;
+            border-bottom: 1px solid rgba(108, 71, 255, .15);
+            position: sticky;
+            top: 0;
+        }
+        
+        tbody td {
+            padding: 12px;
+            font-size: 12.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+            color: #e8eefc;
+            vertical-align: middle;
+        }
+        
+        tbody tr:hover td {
+            background: rgba(108, 71, 255, .05);
+        }
+        /* ══ PILLS & BADGES ═══════════════════════════════════════════════ */
+        
+        .code-pill {
+            display: inline-flex;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(108, 71, 255, .18);
+            color: #c4b5fd;
+            font-weight: 700;
+            font-size: 11.5px;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 700;
+        }
+        
+        .badge-active {
+            background: rgba(16, 185, 129, .12);
+            color: #6ee7b7;
+        }
+        
+        .badge-inactive {
+            background: rgba(244, 63, 94, .12);
+            color: #fca5a5;
+        }
+        /* ══ ROW ACTIONS ══════════════════════════════════════════════════ */
+        
+        .row-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .mini-btn {
+            border: none;
+            border-radius: 8px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 11px;
+            transition: transform 120ms ease-out, filter 120ms ease-out;
+            will-change: transform;
+        }
+        
+        .mini-btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.1);
+        }
+        /* ══ FORMS ════════════════════════════════════════════════════════ */
+        
+        .form-control,
+        .form-select {
+            width: 100%;
+            background: rgba(255, 255, 255, .04);
+            color: #e8eefc;
+            border: 1px solid rgba(108, 71, 255, .18);
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+        }
+        
+        .form-control:focus,
+        .form-select:focus {
+            border-color: rgba(108, 71, 255, .5);
+            box-shadow: 0 0 0 3px rgba(108, 71, 255, .12);
+        }
+        
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, .2);
+        }
+        
+        .form-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, .55);
+            font-weight: 700;
+            display: block;
+            margin-bottom: 6px;
+        }
+        /* ══ KPI ══════════════════════════════════════════════════════════ */
+        
+        .kpi-label {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--v2), var(--b), var(--c));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        /* ══ ALERTS ═══════════════════════════════════════════════════════ */
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 12.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .alert svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+        }
+        
+        .alert-danger,
+        .alert-error {
+            background: rgba(244, 63, 94, .1);
+            color: #fca5a5;
+            border: 1px solid rgba(244, 63, 94, .25);
+        }
+        
+        .alert-success {
+            background: rgba(16, 185, 129, .1);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, .25);
+        }
+        
+        .alert-info {
+            background: rgba(6, 182, 212, .1);
+            color: #67e8f9;
+            border: 1px solid rgba(6, 182, 212, .22);
+        }
+        
+        .alert-warning {
+            background: rgba(245, 158, 11, .1);
+            color: #fcd34d;
+            border: 1px solid rgba(245, 158, 11, .22);
+        }
+        /* ══ PRODUCT CELL ═════════════════════════════════════════════════ */
+        
+        .product-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .product-cell img {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        
+        .img-placeholder {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: rgba(108, 71, 255, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+        
+        .img-placeholder svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.5;
+        }
+        /* ══ DETAIL PANEL ═════════════════════════════════════════════════ */
+        
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 420px;
+            height: 100vh;
+            background: rgba(8, 4, 22, .97);
+            border-right: 1px solid rgba(108, 71, 255, .2);
+            box-shadow: 20px 0 60px rgba(0, 0, 0, .5);
+            z-index: 300;
+            padding: 24px;
+            overflow-y: auto;
+            /* از left به transform تغییر دادیم — GPU accelerated */
+            transform: translateX(-100%);
+            transition: transform 280ms cubic-bezier(.4, 0, .2, 1);
+            will-change: transform;
+        }
+        
+        .detail-panel.open {
+            transform: translateX(0);
+        }
+        /* ══ PAGE FADE ════════════════════════════════════════════════════ */
+        
+        .page-fade {
+            animation: pfi .25s ease-out;
+        }
+        
+        @keyframes pfi {
+            from {
+                opacity: 0;
+                transform: translateY(6px)
+            }
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+        /* ══ SCROLLBAR GLOBAL ═════════════════════════════════════════════ */
+        
+         ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        
+         ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+         ::-webkit-scrollbar-thumb {
+            background: rgba(108, 71, 255, .3);
+            border-radius: 99px;
+        }
+        /* ══ SELECT — استایل سراسری برای همه dropdown ها ════════════════
+           مرورگر به‌صورت پیش‌فرض select را با تم سیستم نمایش می‌دهد
+           (پس‌زمینه سفید، متن سیاه) که با تم تاریک پنل ناسازگار است.
+           این بلاک appearance را حذف می‌کند و رنگ‌بندی را به دست می‌گیرد.
+           ════════════════════════════════════════════════════════════════ */
+        
+        select,
+        .form-select {
+            /* حذف استایل پیش‌فرض مرورگر */
+            appearance: none;
+            -webkit-appearance: none;
+            /* پس‌زمینه تاریک هماهنگ با کارت‌های شیشه‌ای */
+            background: rgba(14, 7, 42, .92) !important;
+            /* رنگ متن روشن */
+            color: #e0e0e0 !important;
+            /* بوردر بنفش کم‌رنگ — یکسان با بقیه فرم‌ها */
+            border: 1px solid rgba(108, 71, 255, .28) !important;
+            border-radius: 12px !important;
+            /* padding راست بیشتر برای فضای فلش سفارشی — RTL */
+            padding: 10px 14px 10px 36px !important;
+            font-family: "Vazir", sans-serif !important;
+            font-size: 13px !important;
+            cursor: pointer;
+            outline: none;
+            /* حذف فلش پیش‌فرض مرورگر */
+            background-image: none !important;
+            /* انتقال نرم بوردر و سایه */
+            transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+        }
+        
+        select:hover,
+        .form-select:hover {
+            /* بوردر پررنگ‌تر هنگام hover */
+            border-color: rgba(108, 71, 255, .55) !important;
+        }
+        
+        select:focus,
+        .form-select:focus {
+            /* بوردر فعال + halo بنفش */
+            border-color: rgba(108, 71, 255, .75) !important;
+            box-shadow: 0 0 0 3px rgba(108, 71, 255, .15) !important;
+        }
+        /* آیتم‌های داخل لیست باز‌شونده */
+        
+        select option {
+            /* پس‌زمینه تاریک برای لیست */
+            background: #0d0820 !important;
+            color: #e0e0e0 !important;
+        }
+        /* آیتم انتخاب‌شده یا hover داخل لیست */
+        
+        select option:checked,
+        select option:hover {
+            background: #2a1a6e !important;
+            color: #fff !important;
+        }
+        /* ── wrapper برای فلش سفارشی ──────────────────────────────────
+           هر جا select داری، یه div.select-wrap دورش بذار تا فلش
+           بنفش سفارشی نمایش داده بشه به‌جای فلش پیش‌فرض مرورگر.
+           مثال:
+             <div class="select-wrap">
+               <select class="form-select">...</select>
+             </div>
+        ─────────────────────────────────────────────────────────────── */
+        
+        .select-wrap {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        /* فلش بنفش سفارشی — سمت چپ برای RTL */
+        
+        .select-wrap::after {
+            content: '▾';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(108, 71, 255, .75);
+            pointer-events: none;
+            font-size: 13px;
+            /* انیمیشن rotate هنگام باز/بسته شدن */
+            transition: transform 200ms cubic-bezier(.4, 0, .2, 1);
+        }
+        /* ══ MOBILE ═══════════════════════════════════════════════════════ */
+        
+        @media (max-width: 900px) {
+            .sidebar {
+                position: fixed;
+                /* از right:-100% به transform تغییر دادیم */
+                right: 0;
+                transform: translateX(100%);
+                max-width: 300px;
+                width: 100%;
+                transition: transform 280ms cubic-bezier(.4, 0, .2, 1);
+                will-change: transform;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .content {
+                margin-right: 0;
+                padding: 16px;
+            }
+            .mobile-btn {
+                display: flex;
+                position: fixed;
+                top: 14px;
+                right: 14px;
+                z-index: 190;
+                background: rgba(8, 4, 22, .9);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 10px 12px;
+                cursor: pointer;
+                color: #fff;
+                font-size: 20px;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+        }
+        
+        @media (min-width: 901px) {
+            .mobile-btn {
+                display: none;
+            }
+        }
+        
+        {
+            % block extra_css %
+        }
+        
+        {
+            % endblock %
+        }
+    </style>
+</head>
+
+<body>
+
+    <button class="mobile-btn" onclick="document.getElementById('sb').classList.toggle('mobile-open')">
+  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+    <div class="sidebar" id="sb">
+        <div class="sidebar-scroll">
+
+            <!-- user card -->
+            <div class="user-card">
+                <a href="{% url 'avatar_select' %}" style="display:block;text-decoration:none">
+                    <div class="avatar-ring">
+                        {% if request.user.profile_image %}
+                        <img src="{{ request.user.profile_image.url }}" alt="avatar"> {% else %}
+                        <div class="avatar-inner">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                        </div>
+                        {% endif %}
+                    </div>
+                </a>
+                <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                <div class="user-pharmacy">{{ request.user.pharmacy_name|default:"داروخانه" }}</div>
+                <div class="online-badge">آنلاین</div>
+                <div class="user-actions">
+                    <a href="{% url 'profile_view' %}" class="ua-btn ua-edit">
+                        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg> پروفایل
+                    </a>
+                    <a href="{% url 'avatar_select' %}" class="ua-btn ua-avatar">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> آواتار
+                    </a>
+                    <a href="{% url 'change_password' %}" class="ua-btn ua-pass">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> رمز
+                    </a>
+                </div>
+            </div>
+
+            <!-- پیشخوان -->
+            <a href="{% url 'staff_dashboard' %}" class="menu-direct {% if request.resolver_match.url_name == 'staff_dashboard' %}active-link{% endif %}">
+                <span class="micon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>                پیشخوان
+            </a>
+
+            <!-- محصولات -->
+            <div class="menu-box">
+                <div class="menu-label">محصولات</div>
+                <div class="menu-root {% if 'product' in request.resolver_match.url_name|default:'' or 'category' in request.resolver_match.url_name|default:'' %}open{% endif %}" onclick="toggleMenu(this)">
+                    <span class="mi">
+                    <span class="micon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>                    مدیریت محصولات
+                    </span>
+                    <span class="arrow">▾</span>
+                </div>
+                <div class="submenu {% if 'product' in request.resolver_match.url_name|default:'' or 'category' in request.resolver_match.url_name|default:'' %}open{% endif %}">
+                    <a href="{% url 'product_list' %}" class="{% if request.resolver_match.url_name == 'product_list' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>                        همه محصولات
+                    </a>
+                    <a href="{% url 'product_add' %}" class="{% if request.resolver_match.url_name == 'product_add' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> افزودن محصول
+                    </a>
+                    <a href="{% url 'category_list' %}" class="{% if 'category' in request.resolver_match.url_name|default:'' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span> دسته‌بندی‌ها
+                    </a>
+                    <a href="{% url 'product_trash' %}" class="{% if request.resolver_match.url_name == 'product_trash' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></span> سطل آشغال
+                    </a>
+                </div>
+            </div>
+
+            <!-- اعلانات -->
+            <div class="menu-box">
+                <div class="menu-label">اعلانات</div>
+                <div class="menu-root {% if 'notification' in request.resolver_match.url_name|default:'' or 'update' in request.resolver_match.url_name|default:'' %}open{% endif %}" onclick="toggleMenu(this)">
+                    <span class="mi">
+                    <span class="micon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span> اعلانات و آپدیت
+                    </span>
+                    <span class="arrow">▾</span>
+                </div>
+                <div class="submenu {% if 'notification' in request.resolver_match.url_name|default:'' or 'update' in request.resolver_match.url_name|default:'' %}open{% endif %}">
+                    <a href="{% url 'notification_list' %}" class="{% if request.resolver_match.url_name == 'notification_list' %}active-link{% endif %}">
+                        <span class="sicon">...</span> اعلانات {% if unread_notif_count %}<span class="nbadge">{{ unread_notif_count }}</span>{% endif %}
+                    </a>
+                    <a href="{% url 'updates_list' %}" class="{% if request.resolver_match.url_name == 'updates_list' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></span> به‌روزرسانی‌ها
+                    </a>
+                </div>
+            </div>
+
+            <!-- اطلاعات مجموعه -->
+            <div class="menu-box">
+                <div class="menu-label">اطلاعات مجموعه</div>
+                <div class="menu-root {% if 'profile' in request.resolver_match.url_name|default:'' or 'password' in request.resolver_match.url_name|default:'' or 'avatar' in request.resolver_match.url_name|default:'' %}open{% endif %}" onclick="toggleMenu(this)">
+                    <span class="mi">
+                    <span class="micon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> مدیریت اطلاعات
+                    </span>
+                    <span class="arrow">▾</span>
+                </div>
+                <div class="submenu {% if 'profile' in request.resolver_match.url_name|default:'' or 'password' in request.resolver_match.url_name|default:'' or 'avatar' in request.resolver_match.url_name|default:'' %}open{% endif %}">
+                    <a href="{% url 'profile_view' %}" class="{% if request.resolver_match.url_name == 'profile_view' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> ویرایش اطلاعات
+                    </a>
+                    <a href="{% url 'avatar_select' %}" class="{% if request.resolver_match.url_name == 'avatar_select' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> انتخاب آواتار
+                    </a>
+                    <a href="{% url 'change_password' %}" class="{% if request.resolver_match.url_name == 'change_password' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span> تغییر رمز
+                    </a>
+                </div>
+            </div>
+
+            <!-- تنظیمات -->
+            <div class="menu-box">
+                <div class="menu-label">تنظیمات</div>
+                <div class="menu-root {% if 'settings' in request.resolver_match.url_name|default:'' %}open{% endif %}" onclick="toggleMenu(this)">
+                    <span class="mi">
+                    <span class="micon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>                    مرکز تنظیمات
+                    </span>
+                    <span class="arrow">▾</span>
+                </div>
+                <div class="submenu {% if 'settings' in request.resolver_match.url_name|default:'' %}open{% endif %}">
+                    <a href="{% url 'settings_financial' %}" class="{% if request.resolver_match.url_name == 'settings_financial' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span> واحد مالی
+                    </a>
+                    <a href="{% url 'settings_accounting' %}" class="{% if request.resolver_match.url_name == 'settings_accounting' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> سیستم حسابداری
+                    </a>
+                    <a href="{% url 'settings_products' %}" class="{% if request.resolver_match.url_name == 'settings_products' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></span> تنظیمات محصولات
+                    </a>
+                </div>
+            </div>
+
+            <!-- راهنما -->
+            <div class="menu-box">
+                <div class="menu-label">راهنما</div>
+                <div class="menu-root {% if 'help' in request.resolver_match.url_name|default:'' %}open{% endif %}" onclick="toggleMenu(this)">
+                    <span class="mi">
+                    <span class="micon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> راهنما و قوانین
+                    </span>
+                    <span class="arrow">▾</span>
+                </div>
+                <div class="submenu {% if 'help' in request.resolver_match.url_name|default:'' %}open{% endif %}">
+                    <a href="{% url 'help_rules' %}" class="{% if request.resolver_match.url_name == 'help_rules' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>                        قوانین
+                    </a>
+                    <a href="{% url 'help_guide' %}" class="{% if request.resolver_match.url_name == 'help_guide' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span> راهنمای برنامه
+                    </a>
+                    <a href="{% url 'help_articles' %}" class="{% if request.resolver_match.url_name == 'help_articles' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span> مقاله‌ها
+                    </a>
+                </div>
+            </div>
+
+            <!-- پشتیبانی -->
+            <div class="menu-box">
+                <div class="menu-label">پشتیبانی</div>
+                <div class="menu-root {% if 'ticket' in request.resolver_match.url_name|default:'' or 'support' in request.resolver_match.url_name|default:'' %}open{% endif %}" onclick="toggleMenu(this)">
+                    <span class="mi">
+                    <span class="micon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span> ارتباط با پشتیبانی
+                    </span>
+                    <span class="arrow">▾</span>
+                </div>
+                <div class="submenu {% if 'ticket' in request.resolver_match.url_name|default:'' or 'support' in request.resolver_match.url_name|default:'' %}open{% endif %}">
+                    <a href="{% url 'ticket_create' %}" class="{% if request.resolver_match.url_name == 'ticket_create' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="9.5" y1="10.5" x2="14.5" y2="10.5"/></svg></span> ثبت تیکت جدید
+                    </a>
+                    <a href="{% url 'ticket_list' %}" class="{% if request.resolver_match.url_name == 'ticket_list' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span> تیکت‌های من {% if open_ticket_count %}<span class="nbadge">{{ open_ticket_count }}</span>{% endif %}
+                    </a>
+                    <a href="{% url 'support_contact' %}" class="{% if request.resolver_match.url_name == 'support_contact' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.18 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.29 6.29l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></span>                        تماس با پشتیبانی
+                    </a>
+                    <a href="{% url 'support_accounting' %}" class="{% if request.resolver_match.url_name == 'support_accounting' %}active-link{% endif %}">
+                        <span class="sicon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span> تماس با حسابداری
+                    </a>
+                </div>
+            </div>
+
+            <!-- بانک دارو -->
+            <a href="{% url 'drug_bank' %}" class="menu-direct {% if request.resolver_match.url_name == 'drug_bank' %}active-link{% endif %}">
+                <span class="micon"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></span> بانک دارو
+            </a>
+
+            <!-- ماشین حساب -->
+            <a href="{% url 'calculator_view' %}" class="menu-direct {% if request.resolver_match.url_name == 'calculator_view' %}active-link{% endif %}">
+                <span class="micon"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg></span>                ماشین حساب
+            </a>
+
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="{% url 'logout_staff' %}">
+                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> خروج از حساب
+            </a>
+        </div>
+    </div>
+
+    <div class="content page-fade">
+        {% if messages %}{% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}{% endif %} {% block content %}{% endblock %}
+    </div>
+
+    <aside class="detail-panel" id="detailPanel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 style="color:#fff;margin:0;font-size:16px">جزئیات محصول</h3>
+            <button onclick="closeDetail()" style="background:rgba(255,255,255,.07);border:none;color:#fff;border-radius:10px;padding:7px 12px;cursor:pointer;font-size:15px">✕</button>
+        </div>
+        <div id="detailContent"></div>
+    </aside>
+    <div id="detailOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250" onclick="closeDetail()"></div>
+
+    <script>
+        function toggleMenu(el) {
+            const sub = el.nextElementSibling;
+            if (!sub || !sub.classList.contains('submenu')) return;
+            const wasOpen = sub.classList.contains('open');
+            document.querySelectorAll('.submenu.open').forEach(s => {
+                s.classList.remove('open');
+                if (s.previousElementSibling) s.previousElementSibling.classList.remove('open');
+            });
+            if (!wasOpen) {
+                sub.classList.add('open');
+                el.classList.add('open');
+            }
+        }
+
+        function openDetailFromBtn(btn) {
+            openDetail(btn.dataset.id, btn.dataset.name, btn.dataset.code, btn.dataset.category, btn.dataset.price, btn.dataset.discount, btn.dataset.final, btn.dataset.image, btn.dataset.description, btn.dataset.created);
+        }
+
+        function openDetail(id, name, code, category, price, discount, finalPrice, imageUrl, description, createdAt) {
+            const img = imageUrl ?
+                `<img src="${imageUrl}" style="width:100%;height:160px;object-fit:cover;border-radius:12px;margin-bottom:16px">` :
+                `<div style="width:100%;height:120px;background:rgba(108,71,255,.1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="40" height="40" fill="none" stroke="rgba(108,71,255,.6)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>`;
+            document.getElementById('detailContent').innerHTML = `${img}<div style="display:flex;flex-direction:column;gap:10px">${dr('نام محصول',name)}${dr('کد محصول',`<span class="code-pill">${code}</span>`)}${dr('دسته‌بندی',category)}${dr('قیمت اصلی',Number(price).toLocaleString()+' تومان')}${dr('تخفیف',discount>0?discount+'٪':'—')}${dr('قیمت نهایی',`<span style="color:#10b981;font-weight:800">${Number(finalPrice).toLocaleString()} تومان</span>`)}${dr('توضیحات',description||'—')}${dr('تاریخ',createdAt)}</div>`;
+        document.getElementById('detailPanel').classList.add('open');
+        document.getElementById('detailOverlay').style.display = 'block';
+    }
+
+    function dr(label, value) {
+        return `<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;border:1px solid rgba(108,71,255,.1)"><div style="font-size:10px;color:rgba(255,255,255,.35);margin-bottom:3px">${label}</div><div style="font-size:13px;color:#fff;font-weight:600">${value}</div></div>`;
+    }
+
+    function closeDetail() {
+        document.getElementById('detailPanel').classList.remove('open');
+        document.getElementById('detailOverlay').style.display = 'none';
+    }
+
+    function toast(msg, type = 'success') {
+        let c = document.getElementById('toast-c');
+        if (!c) {
+            c = document.createElement('div');
+            c.id = 'toast-c';
+            c.style.cssText = 'position:fixed;bottom:24px;left:24px;z-index:9999;display:flex;flex-direction:column;gap:8px';
+            document.body.appendChild(c);
+        }
+        const t = document.createElement('div');
+        t.className = `alert alert-${type}`;
+        t.style.cssText = 'min-width:260px;box-shadow:0 8px 30px rgba(0,0,0,.4)';
+        t.textContent = msg;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+    }
+
+    function getCookie(n) {
+        const v = document.cookie.match('(^|;) ?' + n + '=([^;]*)(;|$)');
+        return v ? v[2] : null;
+    }
+
+    setInterval(() => {
+        fetch("{% url 'online_ping' %}", { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } }).catch(() => {});
+    }, 60000);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+
+</html>

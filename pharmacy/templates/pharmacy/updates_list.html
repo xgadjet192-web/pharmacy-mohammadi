@@ -1,0 +1,49 @@
+{% extends "pharmacy/base.html" %} {% block title %}به‌روزرسانی‌ها{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>به‌روزرسانی‌های سیستم</h4>
+        <span class="sub">آخرین تغییرات و بهبودهای سیستم</span>
+    </div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:16px">
+    {% if updates %} {% for item in updates %} {% with u=item.obj %}
+    <div class="glass-card" style="padding:24px">
+        <div style="display:flex;justify-content:space-between;align-items:start;gap:16px;flex-wrap:wrap">
+            <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                    {% if u.version %}<span style="background:rgba(91,140,255,.15);color:#5b8cff;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">v{{ u.version }}</span>{% endif %} {% if item.confirmed %}<span style="background:rgba(37,194,110,.15);color:#25c26e;padding:4px 12px;border-radius:999px;font-size:12px">✔ تأیید شده</span>                    {% elif u.requires_confirm %}<span style="background:rgba(255,176,32,.15);color:#ffb020;padding:4px 12px;border-radius:999px;font-size:12px">نیاز به تأیید</span>{% endif %}
+                </div>
+                <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">{{ u.title }}</div>
+                <div style="font-size:13px;color:#9fb0d0;line-height:1.8">{{ u.description }}</div>
+                <div style="font-size:11px;color:#64748b;margin-top:10px">{{ item.created_fa }}</div>
+            </div>
+            {% if u.requires_confirm and not item.confirmed %}
+            <button onclick="confirmUpdate({{ u.pk }}, this)" class="btn btn-primary" style="font-size:13px">✔ تأیید دریافت</button> {% endif %}
+        </div>
+    </div>
+    {% endwith %} {% endfor %} {% else %}
+    <div class="glass-card" style="padding:60px;text-align:center;color:#9fb0d0">
+        <div style="font-size:48px;margin-bottom:16px">🚀</div>
+        <div style="font-size:18px;font-weight:700">به‌روزرسانی‌ای دریافت نشد</div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+    function confirmUpdate(pk, btn) {
+        fetch(`/pharmacy/updates/${pk}/confirm/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        }).then(r => r.json()).then(d => {
+            if (d.success) {
+                btn.outerHTML = '<span style="background:rgba(37,194,110,.15);color:#25c26e;padding:4px 12px;border-radius:999px;font-size:12px">✔ تأیید شده</span>';
+            }
+        });
+    }
+</script>
+{% endblock %} {% endblock %}

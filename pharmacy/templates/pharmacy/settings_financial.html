@@ -1,0 +1,121 @@
+{% extends "pharmacy/base.html" %} {% block title %}واحد مالی{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>مرکز تنظیمات</h4>
+        <span class="sub">واحد مالی — سیستم حسابداری — تنظیمات محصولات</span>
+    </div>
+</div>
+
+<div style="padding:24px;display:flex;flex-direction:column;gap:20px">
+
+    <!-- واحد مالی -->
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:28px">
+        <div style="font-weight:700;color:#fff;font-size:15px;margin-bottom:20px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">💵</span> واحد مالی
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+                <label style="font-size:12px;color:rgba(255,255,255,.5);display:block;margin-bottom:6px">واحد پول پیش‌فرض</label>
+                <div class="select-wrap">
+                    <select class="form-select">
+                        <option selected>تومان (IRR)</option>
+                        <option>ریال</option>
+                        <option>دلار (USD)</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label style="font-size:12px;color:rgba(255,255,255,.5);display:block;margin-bottom:6px">فرمت نمایش قیمت</label>
+                <div class="select-wrap">
+                    <select class="form-select">
+                        <option selected>۱۲٬۵۰۰ تومان</option>
+                        <option>12,500 تومان</option>
+                        <option>۱۲۵۰۰</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label style="font-size:12px;color:rgba(255,255,255,.5);display:block;margin-bottom:6px">درصد مالیات بر ارزش افزوده</label>
+                <input type="number" value="9" min="0" max="100" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;color:#fff;font-size:13px;outline:none;font-family:Vazir,sans-serif">
+            </div>
+            <div>
+                <label style="font-size:12px;color:rgba(255,255,255,.5);display:block;margin-bottom:6px">حداقل موجودی هشدار</label>
+                <input type="number" value="10" min="0" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;color:#fff;font-size:13px;outline:none;font-family:Vazir,sans-serif">
+            </div>
+        </div>
+        <button onclick="toast('تنظیمات مالی ذخیره شد','success')" style="margin-top:20px;background:linear-gradient(135deg,#6c47ff,#3b82f6);border:none;border-radius:12px;padding:10px 28px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:Vazir,sans-serif">
+            💾 ذخیره تنظیمات
+        </button>
+    </div>
+
+    <!-- سیستم حسابداری -->
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:28px">
+        <div style="font-weight:700;color:#fff;font-size:15px;margin-bottom:20px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">📊</span> سیستم حسابداری
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+            <div>
+                <label style="font-size:12px;color:rgba(255,255,255,.5);display:block;margin-bottom:6px">آدرس API حسابداری</label>
+                <input type="text" placeholder="https://api.accounting.example.com" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;color:#fff;font-size:13px;outline:none;font-family:Vazir,sans-serif;direction:ltr">
+            </div>
+            <div>
+                <label style="font-size:12px;color:rgba(255,255,255,.5);display:block;margin-bottom:6px">کلید API</label>
+                <input type="password" placeholder="sk-xxxxxxxxxxxx" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;color:#fff;font-size:13px;outline:none;font-family:Vazir,sans-serif;direction:ltr">
+            </div>
+            <div style="display:flex;gap:12px;align-items:center">
+                <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:10px 16px;font-size:12px;color:#fcd34d;flex:1">
+                    ⚠️ برای اتصال به سیستم حسابداری خارجی، آدرس API و کلید دسترسی را وارد کنید.
+                </div>
+            </div>
+            <button onclick="toast('تنظیمات حسابداری ذخیره شد','success')" style="background:linear-gradient(135deg,#6c47ff,#3b82f6);border:none;border-radius:12px;padding:10px 28px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:Vazir,sans-serif;width:fit-content">
+                💾 ذخیره و آزمایش اتصال
+            </button>
+        </div>
+    </div>
+
+    <!-- تنظیمات محصولات -->
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:28px">
+        <div style="font-weight:700;color:#fff;font-size:15px;margin-bottom:20px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">⚙️</span> تنظیمات محصولات
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+                <label style="font-size:12px;color:rgba(255,255,255,.5);display:block;margin-bottom:6px">پیشوند کد محصول</label>
+                <input type="text" value="PRD-" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;color:#fff;font-size:13px;outline:none;font-family:Vazir,sans-serif;direction:ltr">
+            </div>
+            <div>
+                <label style="font-size:12px;color:rgba(255,255,255,.5);display:block;margin-bottom:6px">تعداد نمایش در هر صفحه</label>
+                <div class="select-wrap">
+                    <select class="form-select">
+                        <option>۲۰</option>
+                        <option selected>۵۰</option>
+                        <option>۱۰۰</option>
+                    </select>
+                </div>
+            </div>
+            <div style="grid-column:span 2">
+                <label style="font-size:12px;color:rgba(255,255,255,.5);display:block;margin-bottom:10px">گزینه‌های پیش‌فرض محصول</label>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                        <input type="checkbox" checked style="width:16px;height:16px;accent-color:#6c47ff">
+                        <span style="color:rgba(255,255,255,.7);font-size:13px">محصولات جدید به‌صورت پیش‌فرض فعال باشند</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                        <input type="checkbox" checked style="width:16px;height:16px;accent-color:#6c47ff">
+                        <span style="color:rgba(255,255,255,.7);font-size:13px">هشدار موجودی کم را نمایش بده</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                        <input type="checkbox" style="width:16px;height:16px;accent-color:#6c47ff">
+                        <span style="color:rgba(255,255,255,.7);font-size:13px">قیمت را با احتساب مالیات نمایش بده</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <button onclick="toast('تنظیمات محصولات ذخیره شد','success')" style="margin-top:20px;background:linear-gradient(135deg,#6c47ff,#3b82f6);border:none;border-radius:12px;padding:10px 28px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:Vazir,sans-serif">
+            💾 ذخیره تنظیمات
+        </button>
+    </div>
+
+</div>
+{% endblock %}

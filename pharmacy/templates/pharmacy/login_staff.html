@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود پرسنل — سازمان غذا و دارو فارس</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+        
+         :root {
+            --v: #6c47ff;
+            --v2: #8b6fff;
+            --b: #3b82f6;
+            --c: #06b6d4;
+            --g: #10b981;
+            --r: #f43f5e;
+            --gold: #f59e0b;
+            --pk: #ec4899;
+            --bg: #010006;
+        }
+        
+        html {
+            height: 100%
+        }
+        
+        body {
+            font-family: "Vazir", sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+        /* ══ BACKGROUND ═══════════════════════════════════════════════ */
+        
+        #bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+        /* Deep nebula */
+        
+        #bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 120% 80% at 0% 0%, rgba(108, 71, 255, .32) 0%, transparent 45%), radial-gradient(ellipse 90% 75% at 100% 100%, rgba(59, 130, 246, .25) 0%, transparent 45%), radial-gradient(ellipse 60% 50% at 50% 110%, rgba(6, 182, 212, .14) 0%, transparent 55%), radial-gradient(ellipse 40% 40% at 90% 10%, rgba(16, 185, 129, .1) 0%, transparent 50%), radial-gradient(ellipse 30% 30% at 10% 90%, rgba(236, 72, 153, .08) 0%, transparent 50%), #010006;
+            animation: bgShift 18s ease-in-out infinite alternate;
+        }
+        
+        @keyframes bgShift {
+            0% {
+                filter: hue-rotate(0deg) brightness(1);
+            }
+            100% {
+                filter: hue-rotate(15deg) brightness(1.08);
+            }
+        }
+        /* Hex grid */
+        
+        .hexgrid {
+            position: absolute;
+            inset: 0;
+            opacity: .45;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104'%3E%3Cpath d='M30 2L58 18v34L30 68 2 52V18Z' fill='none' stroke='%236c47ff' stroke-width='.3' stroke-opacity='.22'/%3E%3Cpath d='M30 68L58 52v34L30 104 2 88V54Z' fill='none' stroke='%233b82f6' stroke-width='.3' stroke-opacity='.14'/%3E%3C/svg%3E");
+            background-size: 60px 104px;
+            animation: hxd 30s linear infinite;
+        }
+        
+        @keyframes hxd {
+            0% {
+                background-position: 0 0
+            }
+            100% {
+                background-position: 60px 104px
+            }
+        }
+        /* Aurora bands — more intense */
+        
+        .aur {
+            position: absolute;
+            left: 0;
+            right: 0;
+            border-radius: 100%;
+            animation: aurM ease-in-out infinite alternate;
+        }
+        
+        .aur1 {
+            height: 2px;
+            top: 18%;
+            background: linear-gradient(90deg, transparent 3%, rgba(108, 71, 255, .85) 25%, rgba(59, 130, 246, .65) 55%, rgba(6, 182, 212, .4) 80%, transparent 97%);
+            animation-duration: 8s;
+            filter: blur(.5px);
+        }
+        
+        .aur2 {
+            height: 2px;
+            top: 40%;
+            background: linear-gradient(90deg, transparent 8%, rgba(6, 182, 212, .7) 35%, rgba(16, 185, 129, .55) 62%, transparent 90%);
+            animation-duration: 12s;
+            animation-delay: -5s;
+            filter: blur(.5px);
+        }
+        
+        .aur3 {
+            height: 1px;
+            top: 62%;
+            background: linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, .55) 30%, rgba(244, 63, 94, .45) 60%, transparent 100%);
+            animation-duration: 16s;
+            animation-delay: -9s;
+        }
+        
+        .aur4 {
+            height: 1px;
+            top: 82%;
+            background: linear-gradient(90deg, transparent 12%, rgba(236, 72, 153, .5) 42%, rgba(108, 71, 255, .4) 72%, transparent 100%);
+            animation-duration: 10s;
+            animation-delay: -3s;
+        }
+        
+        @keyframes aurM {
+            0% {
+                transform: scaleY(1) translateX(-8%);
+                opacity: .5;
+            }
+            50% {
+                transform: scaleY(12) translateX(8%);
+                opacity: 1;
+            }
+            100% {
+                transform: scaleY(1) translateX(-8%);
+                opacity: .5;
+            }
+        }
+        /* Shooting stars */
+        
+        .shoot {
+            position: absolute;
+            width: 120px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .8), transparent);
+            border-radius: 1px;
+            animation: shootAnim linear infinite;
+            opacity: 0;
+        }
+        
+        @keyframes shootAnim {
+            0% {
+                opacity: 0;
+                transform: translateX(0) translateY(0);
+            }
+            5% {
+                opacity: 1;
+            }
+            40% {
+                opacity: .8;
+            }
+            70% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-600px) translateY(300px);
+            }
+        }
+        /* Star field */
+        
+        #stars {
+            position: absolute;
+            inset: 0;
+        }
+        
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            animation: twink ease-in-out infinite;
+        }
+        
+        @keyframes twink {
+            0%,
+            100% {
+                opacity: .06;
+                transform: scale(1)
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.8)
+            }
+        }
+        /* Scan lines */
+        
+        .scan {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0, 0, 0, .04) 3px, rgba(0, 0, 0, .04) 4px);
+        }
+        /* Vignette */
+        
+        #bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, rgba(1, 0, 6, .55) 100%);
+            pointer-events: none;
+        }
+        /* ══ CARD ══════════════════════════════════════════════════════ */
+        
+        .card {
+            position: relative;
+            z-index: 10;
+            width: 1140px;
+            max-width: 100%;
+            display: grid;
+            grid-template-columns: 1.2fr 440px;
+            border-radius: 32px;
+            overflow: hidden;
+            border: 1px solid rgba(108, 71, 255, .18);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, .03) inset, 0 80px 200px rgba(0, 0, 0, .9), 0 0 120px rgba(108, 71, 255, .08) inset;
+            animation: cardIn 1s cubic-bezier(.16, 1, .3, 1) both;
+            opacity: 0;
+            transform: translateY(65px) scale(.94);
+        }
+        
+        @keyframes cardIn {
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+        /* Card border glow pulse */
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 32px;
+            z-index: -1;
+            background: conic-gradient(from var(--angle, 0deg), transparent 20%, rgba(108, 71, 255, .5) 40%, rgba(59, 130, 246, .4) 50%, transparent 70%);
+            animation: borderSpin 6s linear infinite;
+            opacity: .35;
+        }
+        
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+        
+        @keyframes borderSpin {
+            to {
+                --angle: 360deg
+            }
+        }
+        /* ══ LEFT PANEL ════════════════════════════════════════════════ */
+        
+        .left {
+            background: linear-gradient(158deg, rgba(14, 7, 42, .99) 0%, rgba(8, 4, 26, .99) 45%, rgba(3, 1, 14, 1) 100%);
+            padding: 56px 50px 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+            overflow: hidden;
+            border-left: 1px solid rgba(108, 71, 255, .09);
+        }
+        
+        .left::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            top: -230px;
+            right: -220px;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(108, 71, 255, .16) 0%, transparent 60%);
+            animation: gp 7s ease-in-out infinite;
+        }
+        
+        .left::after {
+            content: '';
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            bottom: -150px;
+            left: -150px;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(59, 130, 246, .1) 0%, transparent 60%);
+            animation: gp 10s ease-in-out infinite reverse;
+        }
+        
+        @keyframes gp {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: .6
+            }
+            50% {
+                transform: scale(1.18);
+                opacity: 1
+            }
+        }
+        /* Logo */
+        
+        .logo-block {
+            position: relative;
+            z-index: 2;
+            margin-bottom: 28px;
+            animation: sR .9s .15s cubic-bezier(.16, 1, .3, 1) both;
+        }
+        
+        @keyframes sR {
+            from {
+                opacity: 0;
+                transform: translateX(-36px)
+            }
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+        
+        .logo-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+        
+        .emblem {
+            width: 86px;
+            height: 86px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(108, 71, 255, .15), rgba(59, 130, 246, .1));
+            border: 1px solid rgba(108, 71, 255, .3);
+            position: relative;
+            animation: ep 4s ease-in-out infinite;
+        }
+        
+        .emblem::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: conic-gradient(from var(--angle, 0deg), transparent 30%, rgba(108, 71, 255, .7) 50%, rgba(59, 130, 246, .5) 60%, transparent 80%);
+            animation: borderSpin 3s linear infinite;
+            opacity: .6;
+            z-index: 0;
+            border-radius: 50%;
+        }
+        
+        .emblem::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border-radius: 50%;
+            background: rgba(8, 4, 22, .95);
+            z-index: 1;
+        }
+        
+        .emblem svg {
+            position: relative;
+            z-index: 2;
+            width: 54px;
+            height: 54px;
+        }
+        
+        @keyframes ep {
+            0%,
+            100% {
+                box-shadow: 0 0 30px rgba(108, 71, 255, .25), 0 0 60px rgba(108, 71, 255, .1);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(108, 71, 255, .55), 0 0 120px rgba(108, 71, 255, .22), 0 0 6px rgba(255, 255, 255, .2);
+            }
+        }
+        
+        .org-info {}
+        
+        .org-name {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+        
+        .org-sub {
+            font-size: 11px;
+            color: rgba(255, 255, 255, .32);
+            letter-spacing: .3px;
+            line-height: 1.7;
+        }
+        
+        .vbadge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(108, 71, 255, .1);
+            border: 1px solid rgba(108, 71, 255, .24);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(180, 160, 255, .82);
+            letter-spacing: .7px;
+            width: fit-content;
+            margin-top: 10px;
+        }
+        
+        .vdot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--g);
+            box-shadow: 0 0 8px var(--g);
+            animation: vb 1.7s ease-in-out infinite;
+        }
+        
+        @keyframes vb {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1)
+            }
+            50% {
+                opacity: .15;
+                transform: scale(.6)
+            }
+        }
+        
+        .divider {
+            height: 1px;
+            margin: 0 0 24px;
+            background: linear-gradient(90deg, transparent, rgba(108, 71, 255, .3), rgba(59, 130, 246, .18), transparent);
+            position: relative;
+            z-index: 2;
+        }
+        /* Features */
+        
+        .feat-section {
+            position: relative;
+            z-index: 2;
+            margin-bottom: 24px;
+            animation: sR .9s .32s cubic-bezier(.16, 1, .3, 1) both;
+        }
+        
+        .sec-head {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            color: rgba(255, 255, 255, .2);
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sec-head::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(108, 71, 255, .3), transparent);
+        }
+        
+        .feats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+        }
+        
+        .feat {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            padding: 14px 14px;
+            background: rgba(255, 255, 255, .025);
+            border: 1px solid rgba(255, 255, 255, .05);
+            border-radius: 16px;
+            transition: .3s;
+            cursor: default;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feat::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: .3s;
+            background: linear-gradient(135deg, rgba(108, 71, 255, .12), transparent 60%);
+        }
+        
+        .feat:hover::before {
+            opacity: 1;
+        }
+        
+        .feat:hover {
+            border-color: rgba(108, 71, 255, .25);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(108, 71, 255, .12);
+        }
+        
+        .fic {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: .3s;
+        }
+        
+        .feat:hover .fic {
+            transform: scale(1.1);
+        }
+        
+        .fic.p {
+            background: rgba(108, 71, 255, .14);
+            border: 1px solid rgba(108, 71, 255, .22);
+        }
+        
+        .fic.b {
+            background: rgba(59, 130, 246, .14);
+            border: 1px solid rgba(59, 130, 246, .22);
+        }
+        
+        .fic.g {
+            background: rgba(16, 185, 129, .14);
+            border: 1px solid rgba(16, 185, 129, .22);
+        }
+        
+        .fic.go {
+            background: rgba(245, 158, 11, .14);
+            border: 1px solid rgba(245, 158, 11, .22);
+        }
+        
+        .fic.cy {
+            background: rgba(6, 182, 212, .14);
+            border: 1px solid rgba(6, 182, 212, .22);
+        }
+        
+        .fic.pk {
+            background: rgba(236, 72, 153, .14);
+            border: 1px solid rgba(236, 72, 153, .22);
+        }
+        
+        .ftx {}
+        
+        .fn {
+            font-size: 11.5px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, .85);
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        
+        .fd {
+            font-size: 10px;
+            color: rgba(255, 255, 255, .32);
+            line-height: 1.55;
+        }
+        /* Stats */
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 9px;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 24px;
+            animation: sR .9s .48s cubic-bezier(.16, 1, .3, 1) both;
+        }
+        
+        .stat {
+            padding: 14px 10px;
+            background: rgba(255, 255, 255, .022);
+            border: 1px solid rgba(255, 255, 255, .048);
+            border-radius: 14px;
+            text-align: center;
+            transition: .3s;
+        }
+        
+        .stat:hover {
+            background: rgba(108, 71, 255, .07);
+            border-color: rgba(108, 71, 255, .22);
+            transform: translateY(-3px);
+        }
+        
+        .snum {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, var(--v2), var(--b), var(--c));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .slbl {
+            font-size: 9px;
+            color: rgba(255, 255, 255, .28);
+            font-weight: 700;
+            letter-spacing: .4px;
+            line-height: 1.4;
+        }
+        
+        .left-foot {
+            position: relative;
+            z-index: 2;
+            margin-top: auto;
+            font-size: 10px;
+            color: rgba(255, 255, 255, .15);
+            line-height: 1.8;
+            animation: sR .9s .62s cubic-bezier(.16, 1, .3, 1) both;
+        }
+        /* ══ RIGHT PANEL — FORM ════════════════════════════════════════ */
+        
+        .right {
+            background: rgba(7, 4, 22, .94);
+            backdrop-filter: blur(50px) saturate(220%);
+            padding: 56px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Animated corner glows */
+        
+        .right::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            top: -160px;
+            left: -130px;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(59, 130, 246, .09) 0%, transparent 70%);
+            animation: gp2 8s ease-in-out infinite;
+        }
+        
+        .right::after {
+            content: '';
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            bottom: -100px;
+            right: -70px;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(108, 71, 255, .08) 0%, transparent 70%);
+            animation: gp2 11s ease-in-out infinite reverse;
+        }
+        
+        @keyframes gp2 {
+            0%,
+            100% {
+                transform: scale(1)
+            }
+            50% {
+                transform: scale(1.2)
+            }
+        }
+        /* Form floating particles */
+        
+        .fp {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fpfly linear infinite;
+        }
+        
+        @keyframes fpfly {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            12% {
+                opacity: .55;
+            }
+            88% {
+                opacity: .18;
+            }
+            100% {
+                transform: translateY(-400px) translateX(var(--fdx));
+                opacity: 0;
+            }
+        }
+        
+        .fhead {
+            margin-bottom: 32px;
+            animation: sU .85s .3s cubic-bezier(.16, 1, .3, 1) both;
+        }
+        
+        @keyframes sU {
+            from {
+                opacity: 0;
+                transform: translateY(28px)
+            }
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+        
+        .fey {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            color: rgba(108, 71, 255, .68);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+        
+        .fey::before {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 1.5px;
+            background: linear-gradient(90deg, var(--v), transparent);
+        }
+        
+        .fhead h2 {
+            font-size: 30px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        
+        .fhead p {
+            font-size: 12.5px;
+            color: rgba(255, 255, 255, .32);
+            line-height: 1.8;
+        }
+        /* Security badges */
+        
+        .sec-badges {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            animation: sU .85s .42s cubic-bezier(.16, 1, .3, 1) both;
+        }
+        
+        .sbadge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        
+        .sbadge.v {
+            background: rgba(108, 71, 255, .11);
+            border: 1px solid rgba(108, 71, 255, .22);
+            color: rgba(180, 160, 255, .78);
+        }
+        
+        .sbadge.g {
+            background: rgba(16, 185, 129, .09);
+            border: 1px solid rgba(16, 185, 129, .2);
+            color: rgba(100, 220, 160, .78);
+        }
+        
+        .sbadge.b {
+            background: rgba(59, 130, 246, .09);
+            border: 1px solid rgba(59, 130, 246, .2);
+            color: rgba(130, 190, 255, .78);
+        }
+        
+        .bdot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .bdot.gn {
+            background: var(--g);
+            box-shadow: 0 0 5px var(--g);
+            animation: vb 1.7s ease-in-out infinite;
+        }
+        
+        .bdot.vn {
+            background: var(--v2);
+            box-shadow: 0 0 5px var(--v2);
+            animation: vb 1.7s ease-in-out infinite .4s;
+        }
+        
+        .bdot.bn {
+            background: var(--b);
+            box-shadow: 0 0 5px var(--b);
+            animation: vb 1.7s ease-in-out infinite .8s;
+        }
+        /* Error */
+        
+        .ferr {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: rgba(244, 63, 94, .08);
+            border: 1px solid rgba(244, 63, 94, .2);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 22px;
+            font-size: 12px;
+            color: #fda4af;
+            animation: esh .45s cubic-bezier(.36, .07, .19, .97) both;
+        }
+        
+        @keyframes esh {
+            0%,
+            100% {
+                transform: translateX(0)
+            }
+            20% {
+                transform: translateX(-9px)
+            }
+            40% {
+                transform: translateX(9px)
+            }
+            60% {
+                transform: translateX(-5px)
+            }
+            80% {
+                transform: translateX(5px)
+            }
+        }
+        /* Input groups */
+        
+        .fg {
+            margin-bottom: 24px;
+            animation: sU .85s cubic-bezier(.16, 1, .3, 1) both;
+        }
+        
+        .fg1 {
+            animation-delay: .46s
+        }
+        
+        .fg2 {
+            animation-delay: .58s
+        }
+        
+        .flbl {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, .3);
+            letter-spacing: .6px;
+            margin-bottom: 10px;
+        }
+        
+        .flbl .fl {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, .06), transparent);
+        }
+        
+        .fiw {
+            position: relative;
+        }
+        
+        .fic2 {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 54px;
+            border-radius: 0 14px 14px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            pointer-events: none;
+            background: rgba(255, 255, 255, .025);
+            border-left: 1px solid rgba(255, 255, 255, .05);
+            transition: .3s;
+        }
+        
+        .finp {
+            width: 100%;
+            background: rgba(255, 255, 255, .035);
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: 14px;
+            padding: 17px 66px 17px 50px;
+            font-family: "Vazir", sans-serif;
+            font-size: 15px;
+            color: #fff;
+            outline: none;
+            transition: .35s;
+            caret-color: var(--v2);
+        }
+        
+        .finp::placeholder {
+            color: rgba(255, 255, 255, .16);
+        }
+        
+        .finp:focus {
+            border-color: rgba(108, 71, 255, .5);
+            background: rgba(108, 71, 255, .065);
+            box-shadow: 0 0 0 3px rgba(108, 71, 255, .1), 0 8px 28px rgba(108, 71, 255, .1);
+        }
+        
+        .finp:focus~.fic2 {
+            background: rgba(108, 71, 255, .1);
+            border-color: rgba(108, 71, 255, .28);
+            color: var(--v2);
+        }
+        
+        .eyeb {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(255, 255, 255, .2);
+            font-size: 17px;
+            transition: .2s;
+            padding: 5px;
+            border-radius: 6px;
+        }
+        
+        .eyeb:hover {
+            color: var(--v2);
+        }
+        /* Submit button */
+        
+        .fsub {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            font-family: "Vazir", sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(130deg, #6c47ff 0%, #3b82f6 50%, #06b6d4 100%);
+            background-size: 220%;
+            background-position: 100%;
+            transition: .5s;
+            letter-spacing: .4px;
+            animation: sU .85s .7s cubic-bezier(.16, 1, .3, 1) both;
+            margin-top: 6px;
+        }
+        
+        .fsub:hover {
+            background-position: 0%;
+            transform: translateY(-3px);
+            box-shadow: 0 0 60px rgba(108, 71, 255, .55), 0 18px 60px rgba(59, 130, 246, .32);
+        }
+        
+        .fsub:active {
+            transform: translateY(0);
+        }
+        
+        .shine2 {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .24), transparent);
+            transform: skewX(-12deg);
+            animation: bsh 2.2s ease-in-out infinite;
+        }
+        
+        @keyframes bsh {
+            0% {
+                left: -100%
+            }
+            55%,
+            100% {
+                left: 140%
+            }
+        }
+        
+        .fsub.loading .btxt {
+            opacity: 0;
+        }
+        
+        .fsub.loading::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border: 2.5px solid rgba(255, 255, 255, .22);
+            border-top-color: #fff;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: spin .55s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg)
+            }
+        }
+        
+        .ffoot {
+            margin-top: 26px;
+            text-align: center;
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, .18);
+            line-height: 1.8;
+            animation: sU .85s .78s cubic-bezier(.16, 1, .3, 1) both;
+        }
+        
+        .ffoot a {
+            color: rgba(108, 71, 255, .48);
+            text-decoration: none;
+            transition: .2s;
+        }
+        
+        .ffoot a:hover {
+            color: var(--v2);
+        }
+        
+        .stat-icon-wrap {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+        }
+        
+        .si-p {
+            background: rgba(108, 71, 255, .12);
+            border: 1px solid rgba(108, 71, 255, .2);
+        }
+        
+        .si-b {
+            background: rgba(59, 130, 246, .12);
+            border: 1px solid rgba(59, 130, 246, .2);
+        }
+        
+        .si-g {
+            background: rgba(16, 185, 129, .12);
+            border: 1px solid rgba(16, 185, 129, .2);
+        }
+        
+        .si-cy {
+            background: rgba(6, 182, 212, .12);
+            border: 1px solid rgba(6, 182, 212, .2);
+        }
+        /* ══ RESPONSIVE ════════════════════════════════════════════════ */
+        
+        @media(max-width:900px) {
+            .card {
+                grid-template-columns: 1fr;
+            }
+            .left {
+                padding: 40px 32px 36px;
+                border-left: none;
+                border-bottom: 1px solid rgba(108, 71, 255, .1);
+            }
+            .feats {
+                grid-template-columns: 1fr 1fr;
+            }
+            .right {
+                padding: 40px 32px;
+            }
+        }
+        
+        @media(max-width:560px) {
+            body {
+                padding: 12px;
+            }
+            .card {
+                border-radius: 22px;
+            }
+            .feats {
+                grid-template-columns: 1fr;
+            }
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .left {
+                padding: 30px 22px 28px;
+            }
+            .right {
+                padding: 32px 22px;
+            }
+            .fhead h2 {
+                font-size: 24px;
+            }
+            .fsub {
+                padding: 15px;
+                font-size: 14px;
+            }
+            .finp {
+                padding: 14px 60px 14px 44px;
+                font-size: 14px;
+            }
+            .emblem {
+                width: 70px;
+                height: 70px;
+            }
+            .emblem svg {
+                width: 44px;
+                height: 44px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="bg">
+        <div class="hexgrid"></div>
+        <div class="aur aur1"></div>
+        <div class="aur aur2"></div>
+        <div class="aur aur3"></div>
+        <div class="aur aur4"></div>
+        <div id="stars"></div>
+        <div class="scan"></div>
+    </div>
+
+    <div class="card">
+
+        <!-- ══ LEFT ══ -->
+        <div class="left">
+
+            <div class="logo-block">
+                <div class="logo-row">
+                    <div class="emblem">
+                        <svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="27" cy="27" r="25" stroke="rgba(108,71,255,.4)" stroke-width=".8"/>
+            <circle cx="27" cy="27" r="21" stroke="rgba(59,130,246,.2)" stroke-width=".4"/>
+            <line x1="27" y1="7" x2="27" y2="47" stroke="rgba(210,195,255,.65)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M27 12 C18 9 13 15 18 18 C22 21 27 18 27 18" stroke="rgba(108,71,255,.95)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M27 12 C36 9 41 15 36 18 C32 21 27 18 27 18" stroke="rgba(59,130,246,.95)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M27 20 C20 19 17 23 20 26 C23 29 27 28 27 28" stroke="#7c5cff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M27 20 C34 19 37 23 34 26 C31 29 27 28 27 28" stroke="#3b82f6" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M27 28 C20 27 18 32 22 35 C24 37 27 36 27 36" stroke="#7c5cff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M27 28 C34 27 36 32 32 35 C30 37 27 36 27 36" stroke="#3b82f6" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <circle cx="25.2" cy="38.5" r="1.8" fill="#7c5cff" opacity=".9"/>
+            <circle cx="28.8" cy="38.5" r="1.8" fill="#3b82f6" opacity=".9"/>
+            <circle cx="27" cy="8.5" r="2.4" fill="none" stroke="rgba(200,180,255,.5)" stroke-width=".7"/>
+            <circle cx="27" cy="8.5" r="1" fill="rgba(180,155,255,.75)"/>
+          </svg>
+                    </div>
+                    <div class="org-info">
+                        <div class="org-name">سازمان غذا و دارو فارس</div>
+                        <div class="org-sub">سامانه مدیریت یکپارچه داروخانه‌ها</div>
+                        <div class="org-sub">استان فارس — وزارت بهداشت ایران</div>
+                    </div>
+                </div>
+                <div class="vbadge"><span class="vdot"></span> نسخه ۱.۱ &nbsp;|&nbsp; ۱۴۰۵</div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="feat-section">
+                <div class="sec-head">چرا این سامانه؟</div>
+                <div class="feats">
+                    <div class="feat">
+                        <div class="fic p"><svg viewBox="0 0 24 24" fill="none" stroke="#8b6fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6l-8-4z"/><path d="M9 12l2 2 4-4" stroke="#06b6d4" stroke-width="1.8"/></svg></div>
+                        <div class="ftx">
+                            <div class="fn">امنیت نظامی‌درجه</div>
+                            <div class="fd">رمزنگاری AES-256 با احراز هویت دولایه — هیچ نفوذی ممکن نیست</div>
+                        </div>
+                    </div>
+                    <div class="feat">
+                        <div class="fic b"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="rgba(59,130,246,.2)"/></svg></div>
+                        <div class="ftx">
+                            <div class="fn">سرورهای اختصاصی پرسرعت</div>
+                            <div class="fd">زیرساخت ابری اختصاصی با آپ‌تایم ۹۹.۹٪ — هیچ‌وقت قطع نمی‌شود</div>
+                        </div>
+                    </div>
+                    <div class="feat">
+                        <div class="fic g"><svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><ellipse cx="12" cy="5" rx="9" ry="3" fill="rgba(16,185,129,.15)"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+                        <div class="ftx">
+                            <div class="fn">بک‌آپ لحظه‌ای خودکار</div>
+                            <div class="fd">پشتیبان‌گیری هر ۵ دقیقه — داده‌های شما هرگز از دست نمی‌رود</div>
+                        </div>
+                    </div>
+                    <div class="feat">
+                        <div class="fic go"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(245,158,11,.12)"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="8" y2="17"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="16" y1="15" x2="16" y2="17"/></svg></div>
+                        <div class="ftx">
+                            <div class="fn">خروجی Excel و Access</div>
+                            <div class="fd">گزارش‌های تحلیلی کامل با فرمت‌های استاندارد وزارتخانه</div>
+                        </div>
+                    </div>
+                    <div class="feat">
+                        <div class="fic cy"><svg viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="5" y="2" width="14" height="20" rx="2" ry="2" fill="rgba(6,182,212,.12)"/><line x1="12" y1="18" x2="12.01" y2="18" stroke="#06b6d4" stroke-width="2.5"/></svg></div>
+                        <div class="ftx">
+                            <div class="fn">کار کردن با گوشی</div>
+                            <div class="fd">استفاده راحت از سامانه با گوشی یا تبلت — بدون نیاز به نصب اپ</div>
+                        </div>
+                    </div>
+                    <div class="feat">
+                        <div class="fic pk"><svg viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><ellipse cx="12" cy="5" rx="9" ry="3" fill="rgba(236,72,153,.12)"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><line x1="17" y1="17" x2="19" y2="19"/><circle cx="18" cy="16" r="2" stroke="#ec4899"/></svg></div>
+                        <div class="ftx">
+                            <div class="fn">دیتابیس جداگانه هر داروخانه</div>
+                            <div class="fd">ایزولاسیون کامل — هر داروخانه دیتابیس اختصاصی دارد</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat">
+                    <div class="stat-icon-wrap si-p"><svg viewBox="0 0 24 24" fill="none" stroke="#8b6fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                    <div class="snum">۱۰×</div>
+                    <div class="slbl">سرعت ثبت داروها نسبت به روش دستی</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon-wrap si-b"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                    <div class="snum">۰ خطا</div>
+                    <div class="slbl">محاسبات خودکار بدون اشتباه انسانی</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon-wrap si-g"><svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+                    <div class="snum">۴۰٪</div>
+                    <div class="slbl">کاهش هزینه مدیریت اطلاعات داروخانه</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon-wrap si-cy"><svg viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+                    <div class="snum">۲۴/۷</div>
+                    <div class="slbl">دسترسی آنلاین برای تمام پرسنل</div>
+                </div>
+            </div>
+
+            <div class="left-foot">
+                © ۱۴۰۵ سازمان غذا و دارو فارس — وزارت بهداشت، درمان و آموزش پزشکی<br> تمامی حقوق محفوظ است &nbsp;|&nbsp; نسخه ۱.۱.۰
+            </div>
+        </div>
+
+        <!-- ══ RIGHT ══ -->
+        <div class="right" id="formPanel">
+
+            <div class="fhead">
+                <div class="fey">پنل مدیریت پرسنل</div>
+                <h2>خوش آمدید 👋</h2>
+                <p>
+                    با اطلاعات کاربری سازمانی خود وارد شوید<br> دسترسی شما به صورت کاملاً امن ثبت می‌گردد
+                </p>
+            </div>
+
+            <div class="sec-badges">
+                <div class="sbadge v"><span class="bdot vn"></span>AES-256</div>
+                <div class="sbadge g"><span class="bdot gn"></span>سرور فعال</div>
+                <div class="sbadge b"><span class="bdot bn"></span>اتصال امن TLS</div>
+            </div>
+
+            {% if messages %} {% for msg in messages %}
+            <div class="ferr">⚠️ {{ msg }}</div>
+            {% endfor %} {% endif %}
+
+            <form method="post" action="{% url 'login_staff' %}" id="lf" novalidate>
+                {% csrf_token %}
+
+                <div class="fg fg1">
+                    <label class="flbl" for="uid">نام کاربری سازمانی <span class="fl"></span></label>
+                    <div class="fiw">
+                        <input type="text" id="uid" name="username" class="finp" placeholder="نام کاربری را وارد کنید" autocomplete="username" required>
+                        <span class="fic2"><svg viewBox="0 0 24 24" fill="none" stroke="#8b6fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                    </div>
+                </div>
+
+                <div class="fg fg2">
+                    <label class="flbl" for="upw">رمز عبور <span class="fl"></span></label>
+                    <div class="fiw">
+                        <input type="password" id="upw" name="password" class="finp" placeholder="رمز عبور را وارد کنید" autocomplete="current-password" required>
+                        <span class="fic2"><svg viewBox="0 0 24 24" fill="none" stroke="#8b6fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" fill="rgba(108,71,255,.15)"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+                        <button type="button" class="eyeb" id="eyeBtn" onclick="toggleEye()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    </div>
+                </div>
+
+                <button type="submit" class="fsub" id="sb">
+        <span class="shine2"></span>
+        <span class="btxt">ورود به سامانه ←</span>
+      </button>
+            </form>
+
+            <div class="ffoot">
+                فراموشی رمز عبور؟ با مسئول IT سازمان تماس بگیرید
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ── Stars ── */
+        const sc = document.getElementById('stars');
+        for (let i = 0; i < 130; i++) {
+            const s = document.createElement('div');
+            s.className = 'star';
+            const sz = .3 + Math.random() * 2.4;
+            const h = [260, 210, 175, 300][Math.floor(Math.random() * 4)];
+            s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;
+    width:${sz}px;height:${sz}px;
+    background:hsl(${h},75%,${58+Math.random()*32}%);
+    animation-duration:${1.2+Math.random()*6}s;
+    animation-delay:${-Math.random()*7}s;`;
+            sc.appendChild(s);
+        }
+
+        /* ── Shooting stars ── */
+        for (let i = 0; i < 5; i++) {
+            const s = document.createElement('div');
+            s.className = 'shoot';
+            s.style.cssText = `
+    top:${Math.random()*50}%;
+    left:${50+Math.random()*60}%;
+    transform:rotate(${30+Math.random()*20}deg);
+    animation-duration:${6+Math.random()*10}s;
+    animation-delay:${-Math.random()*12}s;
+    width:${80+Math.random()*120}px;
+    opacity:.7;
+  `;
+            document.getElementById('bg').appendChild(s);
+        }
+
+        /* ── Form floating particles ── */
+        const fp = document.getElementById('formPanel');
+        for (let i = 0; i < 20; i++) {
+            const p = document.createElement('div');
+            p.className = 'fp';
+            const sz = .8 + Math.random() * 2.2;
+            const h = Math.random() > .5 ? 260 : 210;
+            p.style.cssText = `width:${sz}px;height:${sz}px;
+    background:hsl(${h},70%,${58+Math.random()*22}%);
+    left:${Math.random()*100}%;
+    bottom:${Math.random()*25}%;
+    --fdx:${(Math.random()-.5)*90}px;
+    animation-duration:${5+Math.random()*10}s;
+    animation-delay:${-Math.random()*12}s;`;
+            fp.appendChild(p);
+        }
+
+        /* ── Counter animation ── */
+        const toFa = n => n.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹' [d]);
+
+        function countUp(el, target, suffix, dur) {
+            const isF = suffix === '٪';
+            let v = 0;
+            const step = target / 55;
+            const t = setInterval(() => {
+                v = Math.min(v + step, target);
+                el.textContent = toFa(isF ? v.toFixed(1) : Math.floor(v)) + suffix;
+                if (v >= target) clearInterval(t);
+            }, dur / 55);
+        }
+        setTimeout(() => {
+            countUp(document.getElementById('sn1'), 247, ' داروخانه', 1100);
+            countUp(document.getElementById('sn2'), 12480, '', 1350);
+            countUp(document.getElementById('sn3'), 99.9, '٪', 1550);
+            countUp(document.getElementById('sn4'), 24, '/۷', 750);
+        }, 700);
+
+        /* ── Eye toggle ── */
+        function toggleEye() {
+            const f = document.getElementById('upw'),
+                b = document.getElementById('eyeBtn');
+            f.type = f.type === 'password' ? 'text' : 'password';
+            b.textContent = f.type === 'password' ? '👁' : '🙈';
+        }
+
+        /* ── Loading ── */
+        document.getElementById('lf').addEventListener('submit', () => {
+            document.getElementById('sb').classList.add('loading');
+        });
+    </script>
+</body>
+
+</html>

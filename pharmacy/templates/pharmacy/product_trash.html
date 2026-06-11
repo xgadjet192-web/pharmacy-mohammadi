@@ -1,0 +1,100 @@
+{% extends "pharmacy/base.html" %} {% block title %}سطل آشغال{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>سطل آشغال</h4>
+        <span class="sub">محصولات حذف شده</span>
+    </div>
+    <div class="topbar-actions">
+        <a href="{% url 'product_list' %}" class="btn btn-secondary">↩ بازگشت</a>
+    </div>
+</div>
+
+<div class="glass-card">
+    {% if products %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>کد محصول</th>
+                    <th>نام محصول</th>
+                    <th>دسته‌بندی</th>
+                    <th>قیمت</th>
+                    <th>اقدامات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in products %}
+                <tr>
+                    <td><span class="code-pill">{{ p.code }}</span></td>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.category.name|default:"—" }}</td>
+                    <td>{{ p.price|floatformat:0 }} تومان</td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="mini-btn" style="background:rgba(37,194,110,.15);color:#25c26e" onclick="restoreProduct({{ p.pk }}, '{{ p.name|escapejs }}')">بازگردانی</button>
+                            <button class="mini-btn" style="background:rgba(255,93,108,.15);color:#ff5d6c" onclick="destroyProduct({{ p.pk }}, '{{ p.name|escapejs }}')">حذف دائمی</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="padding:60px;text-align:center;color:#9fb0d0">
+        <div style="font-size:48px;margin-bottom:16px">🗑</div>
+        <div style="font-size:18px;font-weight:700">سطل آشغال خالی است</div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+    function restoreProduct(pk, name) {
+        if (!confirm(`بازگردانی محصول «${name}»؟`)) return;
+        fetch(`/pharmacy/products/${pk}/restore/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        }).then(r => r.json()).then(d => {
+            if (d.success) {
+                toast(d.message, 'success');
+                location.reload();
+            }
+        });
+    }
+
+    function destroyProduct(pk, name) {
+        if (!confirm(`حذف دائمی محصول «${name}»؟\nاین عمل برگشت‌پذیر نیست!`)) return;
+        fetch(`/pharmacy/products/${pk}/destroy/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        }).then(r => r.json()).then(d => {
+            if (d.success) {
+                toast(d.message, 'success');
+                location.reload();
+            }
+        });
+    }
+
+    function toast(msg, type = 'success') {
+        let c = document.getElementById('toast-c');
+        if (!c) {
+            c = document.createElement('div');
+            c.id = 'toast-c';
+            c.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:9999';
+            document.body.appendChild(c);
+        }
+        const t = document.createElement('div');
+        t.className = `alert alert-${type}`;
+        t.style.cssText = 'min-width:260px;margin-bottom:8px';
+        t.textContent = msg;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+</script>
+{% endblock %} {% endblock %}

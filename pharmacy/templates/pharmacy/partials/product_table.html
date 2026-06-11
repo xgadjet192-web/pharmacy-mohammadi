@@ -1,0 +1,106 @@
+{% load static %} {% if products %}
+<table>
+    <thead>
+        <tr>
+            <th style="width:40px"><input type="checkbox" id="select-all" style="width:16px;height:16px;accent-color:#7c5cff;cursor:pointer"></th>
+            <th>محصول</th>
+            <th>کد</th>
+            <th>دسته‌بندی</th>
+            <th>قیمت</th>
+            <th>تخفیف</th>
+            <th>قیمت نهایی</th>
+            <th>وضعیت</th>
+            <th>تاریخ بارگذاری</th>
+            <th>اقدامات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in products %} {% with p=item.obj %}
+        <tr>
+            <td><input type="checkbox" class="product-checkbox" value="{{ p.pk }}" style="width:16px;height:16px;accent-color:#7c5cff;cursor:pointer"></td>
+
+            <td>
+                <div class="product-cell">
+                    {% if p.image %}
+                    <img src="{{ p.image.url }}" alt="{{ p.name }}"> {% else %}
+                    <div class="img-placeholder">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                            </svg>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <div style="font-weight:800;color:#fff;font-size:13px">{{ p.name }}</div>
+                        {% if p.description %}
+                        <div style="font-size:11px;color:#9fb0d0;margin-top:2px">{{ p.description|truncatechars:40 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </td>
+
+            <td><span class="code-pill">{{ p.code }}</span></td>
+
+            <td style="color:#c9d7f1">{{ p.category.name|default:"—" }}</td>
+
+            <td style="font-weight:700;color:#fcd34d">{{ p.price|floatformat:0 }} تومان</td>
+
+            <td>
+                {% if p.discount_percent > 0 %}
+                <span style="color:#ffb020;font-weight:700;background:rgba(255,176,32,.12);padding:3px 8px;border-radius:999px;font-size:12px">{{ p.discount_percent }}٪</span> {% else %}
+                <span style="color:#9fb0d0">—</span> {% endif %}
+            </td>
+
+            <td style="color:#25c26e;font-weight:700">{{ p.final_price }} تومان</td>
+
+            <td>
+                {% if p.is_active %}
+                <span class="badge badge-active">● فعال</span> {% else %}
+                <span class="badge badge-inactive">● غیرفعال</span> {% endif %}
+            </td>
+
+            <td style="font-size:11px;color:#9fb0d0;white-space:nowrap">
+                {{ item.created_fa }}
+            </td>
+
+            <td>
+                <div class="row-actions">
+                    <button class="mini-btn" style="background:rgba(91,140,255,.2);color:#5b8cff" onclick="openQuickEdit({{ p.pk }}, {{ p.price }}, {{ p.discount_percent }})">
+                        ویرایش سریع
+                    </button>
+                    <a href="{% url 'product_edit' p.pk %}" class="mini-btn" style="background:rgba(255,255,255,.08);color:#e8eefc;text-decoration:none">
+                        ویرایش
+                    </a>
+                    <button class="mini-btn" style="background:rgba(37,194,110,.15);color:#25c26e" data-id="{{ p.pk }}" data-name="{{ p.name|escapejs }}" data-code="{{ p.code }}" data-category="{{ p.category.name|default:'بدون دسته'|escapejs }}" data-price="{{ p.price }}"
+                        data-discount="{{ p.discount_percent }}" data-final="{{ p.final_price }}" data-image="{% if p.image %}{{ p.image.url }}{% endif %}" data-description="{{ p.description|default:''|escapejs }}" data-created="{{ item.created_fa }}" onclick="openDetailFromBtn(this)">
+                        جزئیات
+                    </button>
+                    <button class="mini-btn" style="background:rgba(255,93,108,.15);color:#ff5d6c" onclick="deleteProduct({{ p.pk }}, '{{ p.name|escapejs }}')">
+                        حذف
+                    </button>
+                </div>
+            </td>
+        </tr>
+        {% endwith %} {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+<div style="padding:60px;text-align:center;color:#9fb0d0">
+    <div style="margin-bottom:16px;opacity:.4">
+        <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" style="display:inline-block">
+            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+    </div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#fff">محصولی یافت نشد</div>
+    <div style="font-size:14px;color:#9fb0d0;margin-bottom:20px">
+        هیچ محصولی با این فیلترها پیدا نشد یا هنوز محصولی اضافه نکرده‌اید.
+    </div>
+    <a href="{% url 'product_add' %}" class="btn btn-primary" style="display:inline-flex">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+        </svg> افزودن اولین محصول
+    </a>
+</div>
+{% endif %}

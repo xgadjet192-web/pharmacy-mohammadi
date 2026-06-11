@@ -1,0 +1,414 @@
+{% extends "pharmacy/base.html" %} {% load static %} {% block title %}مدیریت محصولات{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>مدیریت محصولات</h4>
+        <span class="sub">افزودن، ویرایش، حذف، جستجو، فیلتر و مدیریت سریع محصولات</span>
+    </div>
+    <div class="topbar-actions">
+        <a href="{% url 'product_add' %}" class="btn btn-primary">➕ افزودن محصول</a>
+        <button class="btn btn-success" id="btn-export-excel">📊 خروجی Excel</button>
+        <button class="btn btn-info" id="btn-export-access">📋 خروجی Access</button>
+        <button class="btn btn-warning" id="btn-save-site">💾 ذخیره در سایت</button>
+        <button class="btn btn-danger" id="btn-save-accounting">🧮 ذخیره در حسابداری</button>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
+    <div class="glass-card" style="padding:20px;text-align:center">
+        <div class="kpi-label">کل محصولات</div>
+        <div class="kpi-value" id="kpi-total">{{ kpi.total }}</div>
+    </div>
+    <div class="glass-card" style="padding:20px;text-align:center">
+        <div class="kpi-label">فعال</div>
+        <div class="kpi-value" id="kpi-active" style="color:#25c26e">{{ kpi.active }}</div>
+    </div>
+    <div class="glass-card" style="padding:20px;text-align:center">
+        <div class="kpi-label">غیرفعال</div>
+        <div class="kpi-value" id="kpi-inactive" style="color:#ff5d6c">{{ kpi.inactive }}</div>
+    </div>
+    <div class="glass-card" style="padding:20px;text-align:center">
+        <div class="kpi-label">میانگین قیمت</div>
+        <div class="kpi-value" id="kpi-avg" style="font-size:20px">{{ kpi.avg_price }} تومان</div>
+    </div>
+</div>
+
+<div class="glass-card" style="padding:20px;margin-bottom:24px">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:12px;align-items:end">
+        <div>
+            <label class="form-label">جستجو</label>
+            <input type="text" id="search-input" class="form-control" placeholder="نام، کد یا دسته‌بندی..." value="{{ search_query }}">
+        </div>
+        <div>
+            <label class="form-label">دسته‌بندی</label>
+            <select id="filter-category" class="form-select">
+                <option value="">همه دسته‌بندی‌ها</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}"
+                    {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label">وضعیت</label>
+            <select id="filter-status" class="form-select">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="active" {% if selected_status == "active" %}selected{% endif %}>فعال</option>
+                <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>غیرفعال</option>
+            </select>
+        </div>
+        <div>
+            <button class="btn btn-secondary" id="btn-reset">پاک کردن</button>
+        </div>
+    </div>
+
+    <!-- عملیات دسته‌جمعی -->
+    <div id="bulk-bar" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.06)">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <span style="color:#9fb0d0;font-size:13px" id="selected-count">۰ محصول انتخاب شده</span>
+            <button class="btn btn-success" style="padding:7px 14px;font-size:12px" onclick="bulkAction('activate')">فعال کردن</button>
+            <button class="btn btn-secondary" style="padding:7px 14px;font-size:12px" onclick="bulkAction('deactivate')">غیرفعال کردن</button>
+            <button class="btn btn-info" style="padding:7px 14px;font-size:12px" onclick="toggleBulkForm('category')">تغییر دسته‌بندی</button>
+            <button class="btn btn-warning" style="padding:7px 14px;font-size:12px" onclick="toggleBulkForm('price')">تغییر قیمت</button>
+            <button class="btn btn-danger" style="padding:7px 14px;font-size:12px" onclick="bulkAction('delete')">حذف گروهی</button>
+        </div>
+
+        <div id="bulk-form-category" style="display:none;margin-top:12px;gap:10px;align-items:center">
+            <select id="bulk-cat-select" class="form-select" style="width:auto;min-width:180px">
+                {% for cat in categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-primary" style="padding:8px 16px;font-size:12px" onclick="bulkAction('change_category')">تأیید</button>
+        </div>
+
+        <div id="bulk-form-price" style="display:none;margin-top:12px">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                <select id="bulk-price-mode" class="form-select" style="width:auto;min-width:200px">
+                    <option value="fixed_set">قیمت ثابت (تومان)</option>
+                    <option value="fixed_increase">افزایش مبلغ (تومان)</option>
+                    <option value="fixed_decrease">کاهش مبلغ (تومان)</option>
+                    <option value="percent_increase">افزایش درصدی</option>
+                    <option value="percent_decrease">کاهش درصدی</option>
+                </select>
+                <input type="number" id="bulk-price-val" class="form-control" style="width:150px" placeholder="مقدار">
+                <select id="bulk-discount-val" class="form-select" style="width:auto;min-width:150px">
+                    <option value="">تخفیف تغییر نکند</option>
+                    <option value="0">بدون تخفیف (۰٪)</option>
+                    <option value="5">۵٪</option>
+                    <option value="10">۱۰٪</option>
+                    <option value="15">۱۵٪</option>
+                    <option value="20">۲۰٪</option>
+                    <option value="25">۲۵٪</option>
+                    <option value="30">۳۰٪</option>
+                </select>
+                <button class="btn btn-warning" style="padding:8px 16px;font-size:12px" onclick="bulkAction('change_price')">تأیید قیمت</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card">
+    <div class="table-wrap" id="product-table-container">
+        {% include 'pharmacy/partials/product_table.html' %}
+    </div>
+</div>
+
+<!-- مودال ویرایش سریع -->
+<div id="quickEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;align-items:center;justify-content:center">
+    <div class="glass-card" style="width:min(480px,95%);padding:28px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 style="color:#fff;margin:0">ویرایش سریع قیمت</h3>
+            <button onclick="closeQuickEdit()" style="background:rgba(255,255,255,.08);border:none;color:#fff;border-radius:10px;padding:8px 12px;cursor:pointer">✕</button>
+        </div>
+        <input type="hidden" id="qe-id">
+        <div style="display:flex;flex-direction:column;gap:16px">
+            <div>
+                <label class="form-label">قیمت اصلی (تومان)</label>
+                <input type="number" id="qe-price" class="form-control" oninput="calcQE()">
+            </div>
+            <div>
+                <label class="form-label">تخفیف (%)</label>
+                <input type="number" id="qe-discount" class="form-control" min="0" max="100" oninput="calcQE()">
+            </div>
+            <div>
+                <label class="form-label">قیمت نهایی (خودکار)</label>
+                <input type="text" id="qe-final" class="form-control" readonly style="background:rgba(37,194,110,.08);color:#25c26e;font-weight:700">
+            </div>
+            <div id="qe-error" style="display:none" class="alert alert-danger"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+            <button class="btn btn-secondary" onclick="closeQuickEdit()">انصراف</button>
+            <button class="btn btn-primary" onclick="saveQuickEdit()">ذخیره</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script>
+    const URLS = {
+        list: "{% url 'product_list' %}",
+        bulk: "{% url 'product_bulk_action' %}",
+        excel: "{% url 'export_excel' %}",
+        access: "{% url 'export_access' %}",
+        saveSite: "{% url 'save_to_site' %}",
+        saveAcc: "{% url 'save_to_accounting' %}",
+        quickEdit: id => `/pharmacy/products/${id}/quick-edit/`,
+        del: id => `/pharmacy/products/${id}/delete/`,
+    };
+
+    // ── دکمه‌های بالا ──
+    document.getElementById('btn-export-excel').addEventListener('click', () => {
+        window.location.href = URLS.excel;
+    });
+
+    document.getElementById('btn-export-access').addEventListener('click', () => {
+        window.location.href = URLS.access;
+    });
+
+    document.getElementById('btn-save-site').addEventListener('click', () => {
+        if (!confirm('آیا از ذخیره همه محصولات در سایت اطمینان دارید؟')) return;
+        toast('در حال ذخیره در سایت...', 'success');
+        fetch(URLS.saveSite, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) toast(d.message, 'success');
+                else toast('❌ ' + d.error, 'danger');
+            })
+            .catch(() => toast('خطا در ارتباط با سرور.', 'danger'));
+    });
+
+    document.getElementById('btn-save-accounting').addEventListener('click', () => {
+        if (!confirm(
+                'آیا مطمئنید می‌خواهید همه محصولات را در سیستم حسابداری آپدیت کنید؟\n' +
+                'این عملیات قیمت‌ها و اطلاعات محصولات را در سیستم حسابداری به‌روز می‌کند.'
+            )) return;
+        toast('در حال ارسال به سیستم حسابداری...', 'success');
+        fetch(URLS.saveAcc, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) toast(d.message, 'success');
+                else toast('❌ ' + d.error, 'danger');
+            })
+            .catch(() => toast('خطا در ارتباط با سرور.', 'danger'));
+    });
+
+    // ── فیلتر ──
+    let timer;
+    document.getElementById('search-input').addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(load, 400);
+    });
+    document.getElementById('filter-category').addEventListener('change', load);
+    document.getElementById('filter-status').addEventListener('change', load);
+    document.getElementById('btn-reset').addEventListener('click', () => {
+        document.getElementById('search-input').value = '';
+        document.getElementById('filter-category').value = '';
+        document.getElementById('filter-status').value = '';
+        load();
+    });
+
+    function load() {
+        const q = document.getElementById('search-input').value;
+        const cat = document.getElementById('filter-category').value;
+        const st = document.getElementById('filter-status').value;
+        fetch(`${URLS.list}?q=${q}&category=${cat}&status=${st}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(r => r.json())
+            .then(d => {
+                document.getElementById('product-table-container').innerHTML = d.table_html;
+                document.getElementById('kpi-total').textContent = d.kpi.total;
+                document.getElementById('kpi-active').textContent = d.kpi.active;
+                document.getElementById('kpi-inactive').textContent = d.kpi.inactive;
+                document.getElementById('kpi-avg').textContent = d.kpi.avg_price.toLocaleString() + ' تومان';
+                attachEvents();
+            });
+    }
+
+    // ── انتخاب چندگانه ──
+    function attachEvents() {
+        document.querySelectorAll('.product-checkbox').forEach(cb =>
+            cb.addEventListener('change', updateBulk));
+        const sa = document.getElementById('select-all');
+        if (sa) sa.addEventListener('change', e => {
+            document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = e.target.checked);
+            updateBulk();
+        });
+    }
+
+    function updateBulk() {
+        const n = getIds().length;
+        document.getElementById('selected-count').textContent = `${n} محصول انتخاب شده`;
+        document.getElementById('bulk-bar').style.display = n ? 'block' : 'none';
+    }
+
+    function getIds() {
+        return [...document.querySelectorAll('.product-checkbox:checked')].map(c => c.value);
+    }
+
+    // ── عملیات دسته‌جمعی ──
+    function toggleBulkForm(type) {
+        const cat = document.getElementById('bulk-form-category');
+        const price = document.getElementById('bulk-form-price');
+        if (type === 'category') {
+            cat.style.display = cat.style.display === 'none' ? 'flex' : 'none';
+            price.style.display = 'none';
+        } else {
+            price.style.display = price.style.display === 'none' ? 'block' : 'none';
+            cat.style.display = 'none';
+        }
+    }
+
+    function bulkAction(action) {
+        const ids = getIds();
+        if (!ids.length) return toast('ابتدا محصولاتی را انتخاب کنید.', 'danger');
+        if (action === 'delete' && !confirm(`حذف ${ids.length} محصول؟`)) return;
+
+        let body = {
+            action,
+            ids
+        };
+        if (action === 'change_category') {
+            body.category_id = document.getElementById('bulk-cat-select').value;
+        }
+        if (action === 'change_price') {
+            const [mode, dir] = document.getElementById('bulk-price-mode').value.split('_');
+            body = {
+                action,
+                ids,
+                mode,
+                direction: dir,
+                value: document.getElementById('bulk-price-val').value
+            };
+            const disc = document.getElementById('bulk-discount-val').value;
+            if (disc !== '') body.discount = disc;
+        }
+
+        fetch(URLS.bulk, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(body)
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    toast(d.message, 'success');
+                    load();
+                } else toast(d.error, 'danger');
+            });
+    }
+
+    // ── ویرایش سریع ──
+    function openQuickEdit(id, price, discount) {
+        document.getElementById('qe-id').value = id;
+        document.getElementById('qe-price').value = price;
+        document.getElementById('qe-discount').value = discount;
+        calcQE();
+        document.getElementById('quickEditModal').style.display = 'flex';
+    }
+
+    function closeQuickEdit() {
+        document.getElementById('quickEditModal').style.display = 'none';
+    }
+
+    function calcQE() {
+        const p = parseFloat(document.getElementById('qe-price').value) || 0;
+        const d = parseFloat(document.getElementById('qe-discount').value) || 0;
+        const err = document.getElementById('qe-error');
+        if (d > 100) {
+            err.textContent = 'تخفیف نمی‌تواند بیشتر از ۱۰۰٪ باشد.';
+            err.style.display = 'block';
+            return;
+        }
+        err.style.display = 'none';
+        document.getElementById('qe-final').value =
+            Math.round(p - p * d / 100).toLocaleString() + ' تومان';
+    }
+
+    function saveQuickEdit() {
+        const id = document.getElementById('qe-id').value;
+        fetch(URLS.quickEdit(id), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    price: document.getElementById('qe-price').value,
+                    discount_percent: document.getElementById('qe-discount').value
+                })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    closeQuickEdit();
+                    toast('قیمت ذخیره شد.', 'success');
+                    load();
+                } else {
+                    document.getElementById('qe-error').textContent = d.error;
+                    document.getElementById('qe-error').style.display = 'block';
+                }
+            });
+    }
+
+    // ── حذف ──
+    function deleteProduct(id, name) {
+        if (!confirm(`حذف محصول «${name}»؟\nبه سطل آشغال منتقل می‌شود.`)) return;
+        fetch(URLS.del(id), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    toast(d.message, 'success');
+                    load();
+                }
+            });
+    }
+
+    // ── helpers ──
+    function getCookie(n) {
+        const v = document.cookie.match('(^|;) ?' + n + '=([^;]*)(;|$)');
+        return v ? v[2] : null;
+    }
+
+    function toast(msg, type = 'success') {
+        let c = document.getElementById('toast-c');
+        if (!c) {
+            c = document.createElement('div');
+            c.id = 'toast-c';
+            c.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:8px';
+            document.body.appendChild(c);
+        }
+        const t = document.createElement('div');
+        t.className = `alert alert-${type}`;
+        t.style.cssText = 'min-width:260px;box-shadow:0 8px 24px rgba(0,0,0,.3)';
+        t.textContent = msg;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+    }
+
+    attachEvents();
+</script>
+{% endblock %}

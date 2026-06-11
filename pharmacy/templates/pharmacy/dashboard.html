@@ -1,0 +1,201 @@
+{% extends "pharmacy/base.html" %} {% load static %} {% block title %}پیشخوان{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>پیشخوان</h4>
+        <span class="sub">{{ now_fa }}</span>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
+
+    <div class="glass-card" style="padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(108,71,255,.15);border:1px solid rgba(108,71,255,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <svg width="18" height="18" fill="none" stroke="#8b6fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.5px">محصولات کل</div>
+        </div>
+        <div style="font-size:36px;font-weight:800;background:linear-gradient(135deg,#8b6fff,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{{ total_products }}</div>
+        <div style="font-size:11px;color:#10b981;margin-top:6px">{{ active_products }} فعال</div>
+    </div>
+
+    <div class="glass-card" style="padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.22);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <svg width="18" height="18" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.5px">پرسنل آنلاین</div>
+        </div>
+        <div style="font-size:36px;font-weight:800;color:#10b981">{{ online_count }}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:6px">در ۲ دقیقه اخیر فعال</div>
+    </div>
+
+    <div class="glass-card" style="padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <svg width="18" height="18" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.5px">تیکت در انتظار</div>
+        </div>
+        <div style="font-size:36px;font-weight:800;color:#f59e0b">{{ pending_tickets }}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:6px">{{ answered_tickets }} پاسخ داده شده</div>
+    </div>
+
+    <div class="glass-card" style="padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(108,71,255,.15);border:1px solid rgba(108,71,255,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <svg width="18" height="18" fill="none" stroke="#8b6fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.5px">اعلانات خوانده‌نشده</div>
+        </div>
+        <div style="font-size:36px;font-weight:800;background:linear-gradient(135deg,#8b6fff,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{{ unread_notif_count }}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:6px">اعلان جدید</div>
+    </div>
+
+</div>
+
+<!-- آخرین محصولات -->
+<div class="glass-card" style="padding:20px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <h3 style="color:#fff;font-size:15px;margin:0;display:flex;align-items:center;gap:8px">
+            <svg width="15" height="15" fill="none" stroke="#8b6fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>            آخرین محصولات وارد شده
+        </h3>
+        <a href="{% url 'product_list' %}" class="btn btn-secondary" style="padding:6px 14px;font-size:12px">مشاهده همه ←</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>کد</th>
+                    <th>نام محصول</th>
+                    <th>دسته‌بندی</th>
+                    <th>قیمت</th>
+                    <th>تخفیف</th>
+                    <th>قیمت نهایی</th>
+                    <th>وضعیت</th>
+                    <th>تاریخ بارگذاری</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in latest_products %}
+                <tr>
+                    <td><span class="code-pill">{{ item.obj.code }}</span></td>
+                    <td>{{ item.obj.name }}</td>
+                    <td>{{ item.obj.category.name|default:"—" }}</td>
+                    <td>{{ item.obj.price|floatformat:0 }} تومان</td>
+                    <td>{% if item.obj.discount_percent > 0 %}<span style="color:#f59e0b">{{ item.obj.discount_percent }}٪</span>{% else %}—{% endif %}</td>
+                    <td style="color:#10b981;font-weight:700">{{ item.obj.final_price }} تومان</td>
+                    <td>{% if item.obj.is_active %}<span class="badge badge-active">فعال</span>{% else %}<span class="badge badge-inactive">غیرفعال</span>{% endif %}</td>
+                    <td style="font-size:11px;color:rgba(255,255,255,.35)">{{ item.created_fa }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align:center;padding:24px;color:rgba(255,255,255,.3)">محصولی ثبت نشده است</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- اعلانات + تیکت‌ها -->
+<div style="display:grid;grid-template-columns:1.2fr .8fr;gap:20px;margin-bottom:20px">
+
+    <div class="glass-card" style="padding:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <h3 style="color:#fff;font-size:15px;margin:0;display:flex;align-items:center;gap:8px">
+                <svg width="15" height="15" fill="none" stroke="#8b6fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>                آخرین اعلانات
+            </h3>
+            <a href="{% url 'notification_list' %}" class="btn btn-secondary" style="padding:5px 12px;font-size:11px">همه ←</a>
+        </div>
+        {% if announcements %} {% for n in announcements %}
+        <div style="padding:12px 14px;border-radius:12px;margin-bottom:10px;{% if n.notif_type == 'urgent' %}background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.22);{% elif n.notif_type == 'warning' %}background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);{% elif n.notif_type == 'success' %}background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);{% elif n.notif_type == 'update' %}background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);{% else %}background:rgba(108,71,255,.1);border:1px solid rgba(108,71,255,.2);{% endif %}">
+            <div style="font-weight:700;color:#fff;font-size:13px;margin-bottom:4px">{{ n.title }}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.5)">{{ n.message|truncatechars:100 }}</div>
+        </div>
+        {% endfor %} {% else %}
+        <div style="text-align:center;padding:24px;color:rgba(255,255,255,.3);border:1px dashed rgba(108,71,255,.2);border-radius:12px">
+            <svg width="32" height="32" fill="none" stroke="rgba(108,71,255,.4)" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 10px"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>            هیچ اعلانی دریافت نشد
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="glass-card" style="padding:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <h3 style="color:#fff;font-size:15px;margin:0;display:flex;align-items:center;gap:8px">
+                <svg width="15" height="15" fill="none" stroke="#8b6fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> تیکت‌های اخیر
+            </h3>
+            <a href="{% url 'ticket_list' %}" class="btn btn-secondary" style="padding:5px 12px;font-size:11px">همه ←</a>
+        </div>
+        {% if recent_tickets %} {% for t in recent_tickets %}
+        <a href="{% url 'ticket_detail' t.pk %}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;margin-bottom:7px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);text-decoration:none;transition:border-color .15s">
+            <div>
+                <div style="font-weight:700;color:#fff;font-size:12px">{{ t.title|truncatechars:35 }}</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px">{{ t.user.username }}</div>
+            </div>
+            <span style="font-size:10px;padding:3px 8px;border-radius:999px;white-space:nowrap;flex-shrink:0;{% if t.status == 'open' %}background:rgba(245,158,11,.15);color:#fcd34d;{% elif t.status == 'answered' %}background:rgba(16,185,129,.15);color:#6ee7b7;{% else %}background:rgba(255,255,255,.07);color:rgba(255,255,255,.4);{% endif %}">{{ t.get_status_display }}</span>
+        </a>
+        {% endfor %} {% else %}
+        <div style="text-align:center;padding:24px;color:rgba(255,255,255,.3);border:1px dashed rgba(108,71,255,.2);border-radius:12px">
+            <svg width="28" height="28" fill="none" stroke="rgba(108,71,255,.4)" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 10px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> تیکتی ثبت نشده
+        </div>
+        {% endif %}
+        <a href="{% url 'ticket_create' %}" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:10px">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> ثبت تیکت جدید
+        </a>
+    </div>
+</div>
+
+<!-- پرسنل آنلاین + فعالیت اخیر -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+    <div class="glass-card" style="padding:20px">
+        <h3 style="color:#fff;font-size:15px;margin:0 0 14px;display:flex;align-items:center;gap:8px">
+            <svg width="15" height="15" fill="none" stroke="#8b6fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>            پرسنل آنلاین
+        </h3>
+        {% if online_staff %} {% for u in online_staff %}
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;margin-bottom:8px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.1)">
+            <div style="width:34px;height:34px;border-radius:50%;background:rgba(108,71,255,.2);border:1px solid rgba(108,71,255,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <svg width="16" height="16" fill="none" stroke="#8b6fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+                <div style="font-weight:700;color:#fff;font-size:13px">{{ u.get_full_name|default:u.username }}</div>
+                <div style="font-size:11px;color:#10b981;display:flex;align-items:center;gap:4px">
+                    <span style="width:5px;height:5px;border-radius:50%;background:#10b981;display:inline-block"></span> آنلاین{% if u.pharmacy_name %} — {{ u.pharmacy_name }}{% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %} {% else %}
+        <div style="text-align:center;padding:24px;color:rgba(255,255,255,.3);border:1px dashed rgba(108,71,255,.2);border-radius:12px">
+            <svg width="28" height="28" fill="none" stroke="rgba(108,71,255,.4)" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 10px"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> هیچ
+            کاربری آنلاین نیست
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- فعالیت‌های اخیر — فقط ۵ تا با مسیر خوانا -->
+    <div class="glass-card" style="padding:20px">
+        <h3 style="color:#fff;font-size:15px;margin:0 0 14px;display:flex;align-items:center;gap:8px">
+            <svg width="15" height="15" fill="none" stroke="#8b6fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> آخرین
+            فعالیت‌ها
+        </h3>
+        {% if recent_activities %} {% for act in recent_activities %}
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+            <div style="width:7px;height:7px;border-radius:50%;background:rgba(108,71,255,.9);margin-top:4px;flex-shrink:0;box-shadow:0 0 8px rgba(108,71,255,.6)"></div>
+            <div style="flex:1;min-width:0">
+                <div style="font-size:12px;color:rgba(255,255,255,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ act.action }}</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:3px">{{ act.created_at|date:"H:i" }} — امروز</div>
+            </div>
+        </div>
+        {% endfor %} {% else %}
+        <div style="text-align:center;padding:24px;color:rgba(255,255,255,.3)">
+            <svg width="28" height="28" fill="none" stroke="rgba(108,71,255,.4)" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 10px"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>            هنوز فعالیتی ثبت نشده
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}

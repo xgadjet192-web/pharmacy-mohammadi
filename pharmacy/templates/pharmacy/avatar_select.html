@@ -1,0 +1,47 @@
+{% extends "pharmacy/base.html" %} {% block title %}انتخاب آواتار{% endblock %} {% block content %}
+
+<div class="topbar">
+    <div class="topbar-title">
+        <h4>انتخاب آواتار</h4>
+        <span class="sub">آواتار مناسب خود را انتخاب کنید</span>
+    </div>
+    <div class="topbar-actions">
+        <a href="{% url 'profile_view' %}" class="btn btn-secondary">↩ بازگشت</a>
+    </div>
+</div>
+
+{% if messages %}{% for m in messages %}
+<div class="alert alert-{{ m.tags }}" style="margin-bottom:16px">{{ m }}</div>{% endfor %}{% endif %}
+
+<div class="glass-card" style="padding:32px;max-width:600px;margin:0 auto">
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
+            {% for key, label, emoji in avatars %}
+            <label style="cursor:pointer">
+                <input type="radio" name="avatar_type" value="{{ key }}" {% if current == key %}checked{% endif %} style="display:none">
+                <div class="avatar-card {% if current == key %}selected{% endif %}" onclick="selectAvatar(this)"
+                    style="background:rgba(255,255,255,.04);border:2px solid {% if current == key %}#5b8cff{% else %}rgba(255,255,255,.08){% endif %};border-radius:16px;padding:24px;text-align:center;transition:.2s">
+                    <div style="font-size:48px;margin-bottom:10px">{{ emoji }}</div>
+                    <div style="font-size:14px;font-weight:700;color:#fff">{{ label }}</div>
+                </div>
+            </label> {% endfor %}
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+            <button type="submit" class="btn btn-primary">✔ ذخیره آواتار</button>
+        </div>
+    </form>
+</div>
+
+{% block extra_js %}
+<script>
+    function selectAvatar(el) {
+        document.querySelectorAll('.avatar-card').forEach(c => {
+            c.style.borderColor = 'rgba(255,255,255,.08)';
+            c.style.background = 'rgba(255,255,255,.04)';
+        });
+        el.style.borderColor = '#5b8cff';
+        el.style.background = 'rgba(91,140,255,.1)';
+    }
+</script>
+{% endblock %} {% endblock %}
