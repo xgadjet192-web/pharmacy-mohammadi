@@ -81,5 +81,4 @@ urlpatterns = [
     path("drug-bank/<int:pk>/to-product/", views.drug_to_product, name="drug_to_product"),
     
     path('ai-chat/', views.ai_chat, name='ai_chat'),
-    path('setup-admin-x9z2/', views.temp_setup_admin, name='temp_setup_admin'),
     ]
