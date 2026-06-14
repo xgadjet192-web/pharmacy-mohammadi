@@ -21,6 +21,7 @@ from django.template.loader import render_to_string
 import json, openpyxl, sqlite3, tempfile, os, pytz, jdatetime
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+from django.http import JsonResponse, HttpResponse
 
 from .models import (
     Product, Category, Ticket, Notification,
@@ -1884,11 +1885,7 @@ def ai_chat(request):
 # SECTION 19 — TEMPORARY ADMIN SETUP (REMOVE AFTER USE)
 # بخش ۱۹ — ساخت موقت یوزر ادمین (بعد از استفاده حذف شود)
 # ══════════════════════════════════════════════════════════════════
-
 def temp_setup_admin(request):
-    """
-    Temporary view to create/reset a demo staff account on the live server.
-    """
     username = "amir"
     password = "Amir12345"
 
