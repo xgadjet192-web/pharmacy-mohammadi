@@ -82,4 +82,4 @@ urlpatterns = [
     
     path('ai-chat/', views.ai_chat, name='ai_chat'),
     path('setup-admin-x9z2/', views.temp_setup_admin, name='temp_setup_admin'),
-]
+    ]
