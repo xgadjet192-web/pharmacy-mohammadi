@@ -1,0 +1,153 @@
+/* ====== THEME COLORS ====== */
+
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.35);
+    --glass-border: rgba(255, 255, 255, 0.55);
+    --glass-hover: rgba(255, 255, 255, 0.45);
+    --dark-text: #0d2235;
+    --muted-text: #51606d;
+    --shadow-1: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --shadow-2: 0 20px 60px rgba(0, 0, 0, 0.12);
+    --gradient-bg: linear-gradient(135deg, #dff7ff, #e8edff);
+}
+
+
+/* ====== DEFAULT ====== */
+
+body {
+    font-family: "IRANSans", system-ui;
+    background: var(--gradient-bg);
+    direction: rtl;
+    text-align: right;
+    padding: 20px;
+    min-height: 100vh;
+    color: var(--dark-text);
+}
+
+
+/* ====== TITLE ====== */
+
+h2 {
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 25px;
+    color: #0f1f36;
+}
+
+
+/* ====== FILTER BOX ====== */
+
+.filter-box {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-1);
+    border-radius: 16px !important;
+    padding: 20px !important;
+    transition: .25s;
+}
+
+.filter-box:hover {
+    background: var(--glass-hover);
+}
+
+.filter-box input,
+.filter-box select {
+    background: rgba(255, 255, 255, .7) !important;
+    border: 1px solid rgba(255, 255, 255, .9) !important;
+    border-radius: 12px !important;
+    height: 46px;
+    transition: .2s;
+}
+
+.filter-box input:focus,
+.filter-box select:focus {
+    border-color: #4aa5ff !important;
+    box-shadow: 0 0 0 3px rgba(74, 165, 255, .25);
+}
+
+
+/* ====== BUTTONS ====== */
+
+.btn-primary {
+    background: #377dff;
+    border: none;
+    padding: 10px 24px;
+    font-weight: 700;
+    border-radius: 12px;
+    transition: .2s;
+}
+
+.btn-primary:hover {
+    background: #2e6ed8;
+}
+
+
+/* ====== PRODUCT TABLE ====== */
+
+.table {
+    background: var(--glass-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-2);
+}
+
+.table thead {
+    background: rgba(255, 255, 255, .55);
+}
+
+.table thead th {
+    color: var(--muted-text);
+    font-weight: bold;
+}
+
+.table tbody tr {
+    transition: .25s;
+}
+
+.table tbody tr:hover {
+    background: rgba(255, 255, 255, .55);
+    backdrop-filter: blur(11px);
+}
+
+
+/* ====== STOCK STATUS ====== */
+
+.in {
+    color: #28b96a;
+    font-weight: 700;
+}
+
+.out {
+    color: #ff4e4e;
+    font-weight: 700;
+}
+
+
+/* ====== PRODUCT IMAGE ====== */
+
+.product-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, .7);
+    box-shado: 0 4px 12px rgba(0, 0, 0, .15);
+}
+
+
+/* ====== PAGINATION ====== */
+
+.pagination .page-link {
+    border-radius: 10px !important;
+    padding: 8px 16px;
+    border: none;
+    color: var(--dark-text);
+    background: rgba(255, 255, 255, .8);
+    transition: .25s;
+}
+
+.pagination .page-link:hover {
+    background: rgba(255, 255, 255, .95);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, .1);
+}
