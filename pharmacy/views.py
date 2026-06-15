@@ -1881,7 +1881,7 @@ def ai_chat(request):
 
     except Exception as e:
         return JsonResponse({'error': f'خطا در ارتباط با سرویس هوش مصنوعی: {str(e)}'}, status=500)
-    # ══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════
 # SECTION 19 — TEMPORARY ADMIN SETUP (REMOVE AFTER USE)
 # بخش ۱۹ — ساخت موقت یوزر ادمین (بعد از استفاده حذف شود)
 # ══════════════════════════════════════════════════════════════════
@@ -1892,12 +1892,21 @@ def temp_setup_admin(request):
     user, created = PharmacyUser.objects.get_or_create(username=username)
     user.set_password(password)
     user.is_active = True
+    user.is_staff = True
     user.save()
+
+    user.refresh_from_db()
+    check = user.check_password(password)
 
     status = "ساخته شد" if created else "به‌روزرسانی شد"
     return HttpResponse(
         f"کاربر «{username}» با موفقیت {status}.<br>"
         f"یوزرنیم: {username}<br>"
-        f"پسورد: {password}<br><br>"
+        f"پسورد: {password}<br>"
+        f"is_active: {user.is_active}<br>"
+        f"is_staff: {user.is_staff}<br>"
+        f"check_password نتیجه: {check}<br>"
+        f"username دقیق ذخیره‌شده: '{user.username}'<br>"
+        f"تعداد کل یوزرها: {PharmacyUser.objects.count()}<br><br>"
         f"<b>هشدار: همین حالا این صفحه و خط مربوط به آن در urls.py را حذف کنید.</b>"
     )
